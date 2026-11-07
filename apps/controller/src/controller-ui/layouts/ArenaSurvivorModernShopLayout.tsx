@@ -4,7 +4,9 @@ import type {
   LayoutStat,
   ShopOfferModel
 } from "./models.js";
+
 import { translucent } from "../common/translucent.js";
+import { textPicker, type SupportedLanguage } from "@open-party-lab/protocol";
 
 interface ArenaSurvivorModernShopLayoutProps {
   model: ArenaSurvivorModernShopLayoutModel;
@@ -55,14 +57,16 @@ type DetailContent =
       stats: LayoutStat[];
     };
 
-function offerKindLabel(kind: ShopOfferModel["kind"], en: boolean): string {
+
+function offerKindLabel(kind: ShopOfferModel["kind"], language?: SupportedLanguage): string {
+  const t = textPicker(language);
   switch (kind) {
     case "weapon":
-      return en ? "Weapon" : "Waffe";
+      return t("Waffe", "Weapon", "武器");
     case "upgrade":
-      return "Upgrade";
+      return t("Upgrade", "Upgrade", "強化");
     default:
-      return "Item";
+      return t("Item", "Item", "アイテム");
   }
 }
 
@@ -366,10 +370,12 @@ function PowerUpBadge() {
   );
 }
 
-function LevelUpMarker({ choicesRemaining, en }: { choicesRemaining?: number; en: boolean }) {
+
+function LevelUpMarker({ choicesRemaining, language }: { choicesRemaining?: number; language?: SupportedLanguage }) {
+  const t = textPicker(language);
   return (
     <div
-      aria-label={en ? "Level-up power-up selection" : "Level-Up-Power-up-Auswahl"}
+      aria-label={t("Level-Up-Power-up-Auswahl", "Level-up power-up selection", "レベルアップの強化えらび")}
       style={{
         minHeight: 58,
         display: "grid",
@@ -401,7 +407,12 @@ function LevelUpMarker({ choicesRemaining, en }: { choicesRemaining?: number; en
       <strong style={{ fontSize: "1rem", letterSpacing: 0 }}>LVL UP</strong>
       {typeof choicesRemaining === "number" ? (
         <strong
-          aria-label={en ? `${choicesRemaining} choices remaining` : `${choicesRemaining} Auswahlen verbleibend`}
+
+          aria-label={t(
+            `${choicesRemaining} Auswahlen verbleibend`,
+            `${choicesRemaining} choices remaining`,
+            `あと ${choicesRemaining} 回えらべる`
+          )}
           style={{
             minWidth: 36,
             height: 32,
@@ -627,15 +638,17 @@ function LoadoutTile({
 }
 
 function OfferTile({
+
   offer,
   model,
-  en,
+  language,
   levelUp,
   onInfo
 }: {
   offer: ShopOfferModel;
+
   model: ArenaSurvivorModernShopLayoutModel;
-  en: boolean;
+  language?: SupportedLanguage;
   levelUp: boolean;
   onInfo: () => void;
 }) {
@@ -670,7 +683,12 @@ function OfferTile({
       <button
         type="button"
         onClick={onInfo}
-        aria-label={en ? `Show details for ${offer.title}` : `Details zu ${offer.title}`}
+
+        aria-label={textPicker(language)(
+          `Details zu ${offer.title}`,
+          `Show details for ${offer.title}`,
+          `${offer.title} の詳細を見る`
+        )}
         style={{
           position: "relative",
           display: "grid",
@@ -694,21 +712,22 @@ function OfferTile({
         type="button"
         disabled={!canAcquire}
         onClick={() => model.onBuy(offer.id)}
+
         aria-label={
           offer.purchased
-            ? en ? `${offer.title} bought` : `${offer.title} gekauft`
+            ? textPicker(language)(`${offer.title} gekauft`, `${offer.title} bought`, `${offer.title} は買った`)
             : levelUp
-              ? en ? `Choose ${offer.title}` : `${offer.title} waehlen`
-              : en ? `Buy ${offer.title}` : `${offer.title} kaufen`
+              ? textPicker(language)(`${offer.title} waehlen`, `Choose ${offer.title}`, `${offer.title} をえらぶ`)
+              : textPicker(language)(`${offer.title} kaufen`, `Buy ${offer.title}`, `${offer.title} を買う`)
         }
         title={
           offer.purchased
-            ? en ? "Bought" : "Gekauft"
+            ? textPicker(language)("Gekauft", "Bought", "買った")
             : levelUp
-              ? en ? "Choose power-up" : "Power-up waehlen"
+              ? textPicker(language)("Power-up waehlen", "Choose power-up", "強化をえらぶ")
               : offer.affordable
-              ? en ? "Buy" : "Kaufen"
-              : en ? "Too expensive" : "Zu teuer"
+              ? textPicker(language)("Kaufen", "Buy", "買う")
+              : textPicker(language)("Zu teuer", "Too expensive", "お金が足りない")
         }
         style={{
           border: 0,
@@ -798,9 +817,11 @@ function StatGrid({ stats }: { stats?: LayoutStat[] }) {
 
 function resolveDetailContent(
   model: ArenaSurvivorModernShopLayoutModel,
+
   target: DetailTarget | null,
-  en: boolean
+  language?: SupportedLanguage
 ): DetailContent | null {
+  const t = textPicker(language);
   if (!target) {
     return null;
   }
@@ -809,7 +830,8 @@ function resolveDetailContent(
     return {
       type: "stats",
       title: "Stats",
-      subtitle: en ? "Player values" : "Spielerwerte",
+
+      subtitle: t("Spielerwerte", "Player values", "プレイヤーの数値"),
       stats: model.playerStats?.map((stat) => ({ ...stat })) ?? []
     };
   }
@@ -825,12 +847,13 @@ function resolveDetailContent(
       type: "offer",
       title: offer.title,
       subtitle: model.shopMode === "level_up"
+
         ? offer.targetLevel
-          ? `${offerKindLabel(offer.kind, en)} | Lv. ${offer.targetLevel}`
-          : offerKindLabel(offer.kind, en)
+          ? `${offerKindLabel(offer.kind, language)} | Lv. ${offer.targetLevel}`
+          : offerKindLabel(offer.kind, language)
         : offer.targetLevel
-          ? `${offerKindLabel(offer.kind, en)} | Lv. ${offer.targetLevel} | ${offer.cost} M`
-          : `${offerKindLabel(offer.kind, en)} | ${offer.cost} M`,
+          ? `${offerKindLabel(offer.kind, language)} | Lv. ${offer.targetLevel} | ${offer.cost} M`
+          : `${offerKindLabel(offer.kind, language)} | ${offer.cost} M`,
       description: offer.description,
       iconPath: offer.iconPath,
       level: offer.targetLevel,
@@ -878,16 +901,19 @@ function resolveDetailContent(
 }
 
 function DetailSheet({
+
   model,
   detail,
-  en,
+  language,
   onClose
 }: {
   model: ArenaSurvivorModernShopLayoutModel;
+
   detail: DetailContent | null;
-  en: boolean;
+  language?: SupportedLanguage;
   onClose: () => void;
 }) {
+  const t = textPicker(language);
   if (!detail) {
     return null;
   }
@@ -954,7 +980,8 @@ function DetailSheet({
               {detail.subtitle}
             </span>
           </div>
-          <RoundIconButton label={en ? "Close" : "Schliessen"} onClick={onClose} tone="slate">
+
+          <RoundIconButton label={t("Schliessen", "Close", "閉じる")} onClick={onClose} tone="slate">
             <CloseIcon />
           </RoundIconButton>
         </header>
@@ -1035,19 +1062,20 @@ function DetailSheet({
               opacity: canBuy || detail.offer.purchased ? 1 : 0.55
             }}
           >
+
             {detail.offer.purchased ? (
               levelUp
-                ? en ? "Chosen" : "Gewaehlt"
-                : en ? "Bought" : "Gekauft"
+                ? t("Gewaehlt", "Chosen", "えらんだ")
+                : t("Gekauft", "Bought", "買った")
             ) : levelUp ? (
               <>
                 <PowerUpIcon />
-                <span>{en ? "Choose" : "Waehlen"}</span>
+                <span>{t("Waehlen", "Choose", "えらぶ")}</span>
               </>
             ) : detail.offer.affordable ? (
-              en ? `Buy for ${detail.offer.cost} M` : `Kaufen fuer ${detail.offer.cost} M`
+              t(`Kaufen fuer ${detail.offer.cost} M`, `Buy for ${detail.offer.cost} M`, `${detail.offer.cost} M で買う`)
             ) : (
-              en ? `Need ${detail.offer.cost} M` : `${detail.offer.cost} M benoetigt`
+              t(`${detail.offer.cost} M benoetigt`, `Need ${detail.offer.cost} M`, `${detail.offer.cost} M 必要`)
             )}
           </button>
         ) : null}
@@ -1057,8 +1085,13 @@ function DetailSheet({
             {model.onCombineWeapon ? (
               <button
                 type="button"
-                aria-label={en ? `Combine ${detail.weapon.displayName}` : `${detail.weapon.displayName} kombinieren`}
-                title={en ? "Combine weapons" : "Waffen kombinieren"}
+
+                aria-label={t(
+                  `${detail.weapon.displayName} kombinieren`,
+                  `Combine ${detail.weapon.displayName}`,
+                  `${detail.weapon.displayName} を合成する`
+                )}
+                title={t("Waffen kombinieren", "Combine weapons", "武器を合成する")}
                 disabled={!canMerge}
                 onClick={() => {
                   if (!canMerge) {
@@ -1118,17 +1151,22 @@ function DetailSheet({
 }
 
 export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShopLayoutProps) {
-  const en = model.language === "en";
+
+  const t = textPicker(model.language);
   const levelUp = model.shopMode === "level_up";
   const [detailTarget, setDetailTarget] = useState<DetailTarget | null>(null);
-  const detail = useMemo(() => resolveDetailContent(model, detailTarget, en), [detailTarget, en, model]);
+  const detail = useMemo(
+    () => resolveDetailContent(model, detailTarget, model.language),
+    [detailTarget, model]
+  );
   const weapons = model.loadout?.weapons ?? [];
   const items = model.loadout?.items ?? [];
   const ready = model.ready;
   const readyLabel =
     ready?.currentPlayerReady
-      ? en ? "Unset ready" : "Bereit entfernen"
-      : ready?.label ?? (en ? "Ready" : "Bereit");
+
+      ? t("Bereit entfernen", "Unset ready", "準備OKをやめる")
+      : ready?.label ?? t("Bereit", "Ready", "準備OK");
 
   return (
     <div style={{ display: "grid", gap: 12, paddingBottom: 16 }}>
@@ -1155,7 +1193,8 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
           >
             {model.survival ? model.title : compactPlayerName(model.title)}
           </strong>
-          <RoundIconButton label={en ? "Show stats" : "Stats anzeigen"} onClick={() => setDetailTarget({ type: "stats" })} tone="slate">
+
+          <RoundIconButton label={t("Stats anzeigen", "Show stats", "ステータスを見る")} onClick={() => setDetailTarget({ type: "stats" })} tone="slate">
             <StatsIcon />
           </RoundIconButton>
         </div>
@@ -1170,11 +1209,13 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
             </div>
           </>
         ) : levelUp ? (
-          <LevelUpMarker choicesRemaining={model.levelUpChoicesRemaining} en={en} />
+
+          <LevelUpMarker choicesRemaining={model.levelUpChoicesRemaining} language={model.language} />
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: ready ? "1fr 1fr 1fr" : "1fr 1fr", gap: 8 }}>
             <MetricChip icon={<MaterialIcon />} label="M" value={model.materials} tone="gold" />
-            <MetricChip icon={<WaveIcon />} label={en ? "Wave" : "Welle"} value={model.waveNumber} tone="blue" />
+
+            <MetricChip icon={<WaveIcon />} label={t("Welle", "Wave", "ウェーブ")} value={model.waveNumber} tone="blue" />
             {ready ? <MetricChip icon={<ReadyIcon />} label="OK" value={`${ready.readyCount}/${ready.playerCount}`} tone="green" /> : null}
           </div>
         )}
@@ -1185,8 +1226,13 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
               type="button"
               disabled={model.disabled || !model.reroll.affordable}
               onClick={model.reroll.onReroll}
-              aria-label={en ? `Reroll for ${model.reroll.cost} material` : `Neu wuerfeln fuer ${model.reroll.cost} Material`}
-              title={en ? "Reroll" : "Neu wuerfeln"}
+
+              aria-label={t(
+                `Neu wuerfeln fuer ${model.reroll.cost} Material`,
+                `Reroll for ${model.reroll.cost} material`,
+                `素材 ${model.reroll.cost} で並べ直す`
+              )}
+              title={t("Neu wuerfeln", "Reroll", "並べ直す")}
               style={{
                 minHeight: 54,
                 display: "grid",
@@ -1247,7 +1293,8 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
         <section style={{ display: "grid", gap: 8 }}>
           {weapons.length ? (
             <div style={{ display: "grid", gap: 6 }}>
-              <div style={{ color: "var(--text-muted)", fontSize: "0.76rem", fontWeight: 900 }}>{en ? "Weapons" : "Waffen"}</div>
+
+              <div style={{ color: "var(--text-muted)", fontSize: "0.76rem", fontWeight: 900 }}>{t("Waffen", "Weapons", "武器")}</div>
               <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
                 {weapons.map((weapon) => (
                   <LoadoutTile
@@ -1282,7 +1329,8 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
         </section>
       ) : null}
 
-      <section style={{ display: "grid", gap: 8 }} aria-label={levelUp ? (en ? "Level-up power-ups" : "Level-Up-Power-ups") : "Shop"}>
+
+      <section style={{ display: "grid", gap: 8 }} aria-label={levelUp ? t("Level-Up-Power-ups", "Level-up power-ups", "レベルアップの強化") : "Shop"}>
         {levelUp ? (
           <div style={{ display: "flex", alignItems: "center", gap: 7, color: "var(--accent)", fontSize: "0.76rem", fontWeight: 900 }}>
             <PowerUpIcon size={18} />
@@ -1297,7 +1345,8 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
               key={offer.id}
               offer={offer}
               model={model}
-              en={en}
+
+              language={model.language}
               levelUp={levelUp}
               onInfo={() => setDetailTarget({ type: "offer", id: offer.id })}
             />
@@ -1305,7 +1354,8 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
         </div>
       </section>
 
-      <DetailSheet model={model} detail={detail} en={en} onClose={() => setDetailTarget(null)} />
+
+      <DetailSheet model={model} detail={detail} language={model.language} onClose={() => setDetailTarget(null)} />
     </div>
   );
 }

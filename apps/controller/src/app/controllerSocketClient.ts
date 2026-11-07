@@ -10,7 +10,7 @@ import type {
 } from "@open-party-lab/protocol";
 import { applyThemeVariables, normalizeThemeName, type ThemeName } from "@open-party-lab/ui-kit";
 import { io, type Socket } from "socket.io-client";
-import { ServerClock, startServerClockSync } from "@open-party-lab/game-core";
+import { ServerClock, startServerClockSync, textPicker } from "@open-party-lab/game-core";
 import {
   readStoredControllerLanguage,
   writeStoredControllerLanguage
@@ -154,10 +154,11 @@ export class ControllerSocketClient {
     this.socket.on("connect_error", (error) => {
       this.updateState({
         connected: false,
-        error:
-          this.state.preferredLanguage === "en"
-            ? `Connection to server failed: ${error.message}`
-            : `Verbindung zum Server fehlgeschlagen: ${error.message}`
+        error: textPicker(this.state.preferredLanguage)(
+          `Verbindung zum Server fehlgeschlagen: ${error.message}`,
+          `Connection to server failed: ${error.message}`,
+          `サーバーにつなげなかった: ${error.message}`
+        )
       });
     });
 
@@ -315,10 +316,11 @@ export class ControllerSocketClient {
 
     if (!reconnectToken) {
       this.updateState({
-        error:
-          this.state.preferredLanguage === "en"
-            ? "No saved session found."
-            : "Keine gespeicherte Session gefunden.",
+        error: textPicker(this.state.preferredLanguage)(
+          "Keine gespeicherte Session gefunden.",
+          "No saved session found.",
+          "保存されたセッションが無い。"
+        ),
         hasStoredSession: false
       });
       return;
@@ -413,10 +415,11 @@ export class ControllerSocketClient {
         this.clearStoredSession({
           rotateDeviceId: true,
           disconnect: true,
-          error:
-            this.state.preferredLanguage === "en"
-              ? "You left the room."
-              : "Du hast den Raum verlassen."
+          error: textPicker(this.state.preferredLanguage)(
+            "Du hast den Raum verlassen.",
+            "You left the room.",
+            "部屋から出た。"
+          )
         });
       }
     );
@@ -470,14 +473,22 @@ export class ControllerSocketClient {
 
   async setProfile(name: string, avatar: string | null): Promise<string | null> {
     const { room, player } = this.state;
-    const en = this.state.preferredLanguage === "en";
+    const t = textPicker(this.state.preferredLanguage);
     if (!room || !player || !this.state.connected) {
-      return en ? "Waiting for reconnection." : "Warte auf die Wiederverbindung.";
+      return t(
+        "Warte auf die Wiederverbindung.",
+        "Waiting for reconnection.",
+        "つなぎ直すのを待っている。"
+      );
     }
     return new Promise((resolve) => {
       this.socket.timeout(8_000).emit("player:set-profile", { roomCode: room.code, playerId: player.id, name, avatar }, (error, result) => {
         if (error) {
-          resolve(en ? "No response. Please try again." : "Keine Antwort. Bitte erneut versuchen.");
+          resolve(t(
+            "Keine Antwort. Bitte erneut versuchen.",
+            "No response. Please try again.",
+            "返事がない。もう一度試して。"
+          ));
           return;
         }
         if (!result.ok) { resolve(result.error); return; }

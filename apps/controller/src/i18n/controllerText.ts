@@ -103,6 +103,8 @@ export interface ControllerText {
   fullscreenHelpClose: string;
   score: string;
   lobbySelected: (gameName: string) => string;
+  /** Heading of the lobby screen, shown in front of the room code. */
+  lobbyTitle: string;
   lobbyWaitingHost: string;
   leaveRoom: string;
   ready: string;
@@ -207,6 +209,7 @@ const controllerText = {
     fullscreenHelpClose: "Verstanden",
     score: "Score",
     lobbySelected: (gameName: string) => `Ausgewaehlt: ${gameName}`,
+    lobbyTitle: "Lobby",
     lobbyWaitingHost: "Der Host waehlt gleich ein Spiel.",
     leaveRoom: "Raum verlassen",
     ready: "Bereit",
@@ -331,6 +334,7 @@ const controllerText = {
     fullscreenHelpClose: "Got it",
     score: "Score",
     lobbySelected: (gameName: string) => `Selected: ${gameName}`,
+    lobbyTitle: "Lobby",
     lobbyWaitingHost: "The host is about to pick a game.",
     leaveRoom: "Leave room",
     ready: "Ready",
@@ -380,6 +384,131 @@ const controllerText = {
           return "Finished";
         default:
           return "Waiting";
+      }
+    }
+  },
+  ja: {
+    inputs: {
+      move: "いどう", aim: "ねらう", look: "みまわす",
+      joystickHint: "中心のあたりはゆっくり、端まで倒すと全速で動く。",
+      statusReport: "ステータス", cardBack: "カードの裏",
+      driveStick: "走行スティック", raceActions: "走行アクション",
+      left: "ひだり", right: "みぎ", forward: "ぜんしん", reverse: "こうたい",
+      ready: "じゅんびOK", boost: "ブースト", fire: "うつ", drift: "ドリフト"
+    },
+    hostControlTitle: "ホスト操作",
+    hostControlTake: "ホスト操作を引き継ぐ",
+    hostControlPending: "リクエストを送った。",
+    hostControlPendingCountdown: (seconds: number) =>
+      `誰も止めなければ ${seconds} 秒で引き継ぐ。`,
+    hostControlHeldByOther: (name: string) => `${name} がホストを操作中。`,
+    hostControlHandoverTitle: "操作を渡す？",
+    hostControlHandoverBody: (name: string) => `${name} が操作を引き継ぎたいと言っている。`,
+    hostControlHandoverKeep: "渡さない",
+    hostControlHandoverGive: "渡す",
+    hostControlHandoverCountdown: (seconds: number) =>
+      `答えないと ${seconds} 秒で渡る。`,
+    hostMenuOpen: "ホストメニュー",
+    hostMenuTitle: "ホストメニュー",
+    hostMenuPausedNote: "このメニューを開いている間、ラウンドは止まっている。",
+    hostMenuResume: "再開する",
+    hostMenuToMainMenu: "メインメニューへ",
+    hostControlActive: "君がホストを操作している。",
+    hostControlRelease: "操作を返す",
+    themeLabel: "配色",
+    themeLight: "ライト",
+    themeDark: "ダーク",
+    languageLabel: "言語",
+    hostControlChooseGame: "ゲームを選ぶ",
+    hostControlStartRound: "ラウンド開始",
+    hostControlBackToMenu: "メニューに戻る",
+    hostControlRoster: "部屋のプレイヤー",
+    hostControlKick: (name: string) => `${name} を退出させる`,
+    hostControlRoundRunning: "ラウンド中は操作できない。",
+    joinTitle: "参加する",
+    joinSubtitle: "大きい画面に出ている部屋にスマホをつなぐ。",
+    roomCode: "部屋コード",
+    name: "名前",
+    joinRoom: "部屋に入る",
+    connectingController: "コントローラーをサーバーにつないでいる ...",
+    serverConnected: "サーバーにつながった。",
+    serverNotConnected: "まだサーバーにつながっていない。",
+    reconnectTitle: "セッションを続ける",
+    reconnectSubtitle: "この端末に前回のコントローラーのセッションが残っている。",
+    continueSession: "セッションを続ける",
+    discardLocalSession: "残っているセッションを捨てる",
+    room: "部屋",
+    notFoundTitle: "ページが見つからない",
+    notFoundSubtitle: "コントローラー画面を作れなかった。",
+    notFoundBody: "ページを読み込み直すか、もう一度部屋に入り直して。",
+    controllerTitle: "コントローラー",
+    preparingGameView: "ゲーム画面を準備している。",
+    unsupportedGame: "ホストはまだ対応しているゲームを始めていない。",
+    phase: "フェーズ",
+    unknown: "不明",
+    logout: "ログアウト",
+    fullscreen: "全画面",
+    exitFullscreen: "全画面をやめる",
+    fullscreenHint: "タップか F で全画面になる",
+    exitFullscreenHint: "Esc か F で全画面をやめる",
+    fullscreenHelp: "全画面のヘルプ",
+    fullscreenInstallTitle: "ブラウザのバーを消して遊ぶ",
+    fullscreenInstallBody: "このブラウザはボタンでコントローラーを全画面にできない。Safari でこのページを開いて、メニューの「共有」→「ホーム画面に追加」を選ぶ。「Web アプリとして開く」が出たらオンにする。\n\nそのあと、新しくできたアイコンからコントローラーを開く。必要ならそこで部屋に入り直して。",
+    fullscreenUnavailable: "このブラウザはコントローラーの全画面に対応していない。このままでも遊べるし、別のブラウザを使ってもいい。",
+    fullscreenFailed: "ブラウザが全画面への切り替えを断った。この案内を閉じてもう一度試して。全画面なしでも遊べる。",
+    fullscreenHelpClose: "わかった",
+    score: "スコア",
+    lobbySelected: (gameName: string) => `選択中: ${gameName}`,
+    lobbyTitle: "ロビー",
+    lobbyWaitingHost: "ホストがもうすぐゲームを選ぶ。",
+    leaveRoom: "部屋から出る",
+    ready: "じゅんびOK",
+    notReady: "まだ",
+    chooseCharacterFirst: "先にキャラを選んで",
+    chooseSetupFirst: "先に設定を選んで",
+    setup: "設定",
+    setupChooseTitle: "設定を選ぶ",
+    selectionCount: (selected: number, min: number, max: number) =>
+      `${selected}/${max} 選択中、最低 ${min}`,
+    characterChooseTitle: "キャラを選ぶ",
+    characterChooseDescription: "先に、このランで使うキャラを選ぶ。選んだら準備OKにできる。",
+    yourCharacter: "君のキャラ",
+    select: "選ぶ",
+    chosenBy: (names: string) => `${names} が選択中`,
+    stillFree: "まだ空き",
+    players: "プレイヤー",
+    minRequired: (minPlayers: number) => `最低 ${minPlayers} 人必要`,
+    needsMorePlayers: "このゲームはもっと人数が必要。",
+    readyCount: "じゅんびOK",
+    character: "キャラ",
+    noCharacter: "キャラ未選択",
+    connectedReady: "じゅんびOK",
+    connectedWaiting: "待っている",
+    nextRound: "次のラウンド",
+    nextRoundDescription: (readyCount: number, playerCount: number) =>
+      `${readyCount}/${playerCount} 人が準備OKになったら次のラウンドが始まる。`,
+    readyForNextRound: "次のラウンドの準備OK",
+    readyForNextRoundQuestion: "次のラウンド、準備OK？",
+    waitForPlayers: (readyCount: number, playerCount: number) =>
+      `全員を待っている。${readyCount}/${playerCount} 人が準備OK。`,
+    formatPhase: (phase: PublicGamePhase | string | undefined) => {
+      switch (phase) {
+        case "round_intro":
+          return "イントロ";
+        case "countdown":
+          return "カウントダウン";
+        case "playing":
+          return "プレイ中";
+        case "locked":
+          return "ロック中";
+        case "result":
+          return "結果";
+        case "scoreboard":
+          return "スコア";
+        case "finished":
+          return "終了";
+        default:
+          return "待機中";
       }
     }
   }

@@ -1,24 +1,25 @@
 import { useEffect, useState } from "react";
 import type { ShopLayoutModel } from "./models.js";
+import { textPicker, type SupportedLanguage } from "@open-party-lab/protocol";
 import { BigButton } from "../common/BigButton.js";
 
 interface ShopLayoutProps {
   model: ShopLayoutModel;
 }
 
-function formatLabel(kind: ShopLayoutModel["offers"][number]["kind"], en: boolean): string {
+function formatLabel(kind: ShopLayoutModel["offers"][number]["kind"], language?: SupportedLanguage): string {
   switch (kind) {
     case "weapon":
-      return en ? "Weapon" : "Waffe";
+      return textPicker(language)("Waffe", "Weapon", "武器");
     case "upgrade":
-      return "Upgrade";
+      return textPicker(language)("Upgrade", "Upgrade", "強化");
     default:
-      return "Item";
+      return textPicker(language)("Item", "Item", "アイテム");
   }
 }
 
 export function ShopLayout({ model }: ShopLayoutProps) {
-  const en = model.language === "en";
+  const t = textPicker(model.language);
   const [selectedWeaponInstanceId, setSelectedWeaponInstanceId] = useState<string | null>(null);
   const selectedWeapon =
     model.loadout?.weapons.find(
@@ -59,7 +60,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
       >
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline" }}>
           <strong style={{ fontSize: "1.3rem", color: model.accentColor ?? "var(--accent)" }}>{model.title}</strong>
-          <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>{en ? "Wave" : "Welle"} {model.waveNumber}</span>
+          <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>{t("Welle", "Wave", "ウェーブ")} {model.waveNumber}</span>
         </div>
         {model.subtitle ? <span style={{ color: "var(--text-muted)" }}>{model.subtitle}</span> : null}
         {model.helperText ? <span style={{ color: "var(--text-muted)" }}>{model.helperText}</span> : null}
@@ -78,12 +79,15 @@ export function ShopLayout({ model }: ShopLayoutProps) {
         >
           <div style={{ display: "grid", gap: 4 }}>
             <strong style={{ fontSize: "1.05rem" }}>
-              {model.ready.currentPlayerReady ? (en ? "Ready for next wave" : "Bereit fuer naechste Welle") : en ? "Not ready yet" : "Noch nicht bereit"}
+              {model.ready.currentPlayerReady ? t("Bereit fuer naechste Welle", "Ready for next wave", "次のウェーブの準備OK") : t("Noch nicht bereit", "Not ready yet", "まだ準備できていない")}
             </strong>
             <span style={{ color: "var(--text-muted)", lineHeight: 1.45 }}>
-              {model.ready.description ?? (en
-                ? `Waiting for all players. ${model.ready.readyCount}/${model.ready.playerCount} ready.`
-                : `Warte auf alle Spieler. ${model.ready.readyCount}/${model.ready.playerCount} bereit.`)}
+
+              {model.ready.description ?? t(
+                `Warte auf alle Spieler. ${model.ready.readyCount}/${model.ready.playerCount} bereit.`,
+                `Waiting for all players. ${model.ready.readyCount}/${model.ready.playerCount} ready.`,
+                `みんなを待っている。${model.ready.readyCount}/${model.ready.playerCount} 人が準備OK。`
+              )}
             </span>
           </div>
 
@@ -98,7 +102,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                 : "linear-gradient(180deg, var(--accent) 0%, var(--accent) 100%)"
             }}
           >
-            {model.ready.currentPlayerReady ? (en ? "Not ready" : "Nicht bereit") : model.ready.label}
+            {model.ready.currentPlayerReady ? t("Nicht bereit", "Not ready", "準備をやめる") : model.ready.label}
           </BigButton>
         </section>
       ) : null}
@@ -130,7 +134,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
               border: "1px solid var(--panel-border)"
             }}
           >
-            <div style={{ color: "var(--text-muted)", fontSize: "0.84rem" }}>{en ? "Waves played" : "Gespielte Wellen"}</div>
+            <div style={{ color: "var(--text-muted)", fontSize: "0.84rem" }}>{t("Gespielte Wellen", "Waves played", "遊んだウェーブ数")}</div>
             <strong style={{ fontSize: "1.6rem" }}>{model.runSummary.wavesCleared}</strong>
           </div>
         ) : null}
@@ -138,7 +142,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
 
       {model.loadout?.items?.length || model.loadout?.weapons?.length ? (
         <section style={{ display: "grid", gap: 10 }}>
-          <h2 style={{ margin: 0, fontSize: "1rem", color: "var(--text-muted)" }}>{en ? "Active Setup" : "Aktives Setup"}</h2>
+          <h2 style={{ margin: 0, fontSize: "1rem", color: "var(--text-muted)" }}>{t("Aktives Setup", "Active Setup", "いまの装備")}</h2>
           <div style={{ display: "grid", gap: 8 }}>
             {model.loadout?.weapons?.map((weapon, index) => (
               <button
@@ -184,7 +188,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                   {`W${index + 1} ${weapon.displayName}`}
                   {weapon.sellable ? (
                     <span style={{ display: "block", color: "var(--text-muted)", fontSize: "0.68rem", marginTop: 2 }}>
-                      {en ? "Sell" : "Verkauf"} {weapon.sellValue ?? 0} M
+                      {t("Verkauf", "Sell", "売る")} {weapon.sellValue ?? 0} M
                     </span>
                   ) : null}
                   {weapon.canCombine ? (
@@ -197,7 +201,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                         fontWeight: 700
                       }}
                     >
-                      {en ? "Merge ready" : "Kombi bereit"}
+                      {t("Kombi bereit", "Merge ready", "合成できる")}
                     </span>
                   ) : null}
                 </span>
@@ -235,13 +239,18 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                   : "color-mix(in srgb, var(--surface-raised) 82%, transparent)"
               }}
             >
+
               {selectedWeapon.canCombine
-                ? en
-                  ? `Merge ${selectedWeapon.displayName} to Lv. ${selectedWeapon.level + 1}`
-                  : `${selectedWeapon.displayName} zu Lv. ${selectedWeapon.level + 1} kombinieren`
-                : en
-                  ? "Merge needs two matching weapons of the same level"
-                  : "Kombinieren braucht zwei gleiche Waffen desselben Levels"}
+                ? t(
+                    `${selectedWeapon.displayName} zu Lv. ${selectedWeapon.level + 1} kombinieren`,
+                    `Merge ${selectedWeapon.displayName} to Lv. ${selectedWeapon.level + 1}`,
+                    `${selectedWeapon.displayName} を Lv.${selectedWeapon.level + 1} に合成`
+                  )
+                : t(
+                    "Kombinieren braucht zwei gleiche Waffen desselben Levels",
+                    "Merge needs two matching weapons of the same level",
+                    "合成には同じレベルの同じ武器が2つ必要"
+                  )}
             </BigButton>
           ) : null}
           {selectedWeapon ? (
@@ -306,11 +315,14 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                       : "color-mix(in srgb, var(--surface-raised) 82%, transparent)"
                   }}
                 >
+
                   {selectedWeapon.sellable
-                    ? en
-                      ? `Sell for ${selectedWeapon.sellValue ?? 0} M`
-                      : `Verkaufen fuer ${selectedWeapon.sellValue ?? 0} M`
-                    : en ? "Cannot sell" : "Nicht verkaufbar"}
+                    ? t(
+                        `Verkaufen fuer ${selectedWeapon.sellValue ?? 0} M`,
+                        `Sell for ${selectedWeapon.sellValue ?? 0} M`,
+                        `${selectedWeapon.sellValue ?? 0} M で売る`
+                      )
+                    : t("Nicht verkaufbar", "Cannot sell", "売れない")}
                 </BigButton>
                 {model.onCombineWeapon ? (
                   <BigButton
@@ -326,8 +338,8 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                     }}
                   >
                     {selectedWeapon.canCombine
-                      ? en ? `Merge to Lv. ${selectedWeapon.level + 1}` : `Kombinieren zu Lv. ${selectedWeapon.level + 1}`
-                      : en ? "No matching copy" : "Keine passende Kopie"}
+                      ? t(`Kombinieren zu Lv. ${selectedWeapon.level + 1}`, `Merge to Lv. ${selectedWeapon.level + 1}`, `Lv.${selectedWeapon.level + 1} に合成`)
+                      : t("Keine passende Kopie", "No matching copy", "同じものが無い")}
                   </BigButton>
                 ) : null}
                 </div>
@@ -351,7 +363,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                 background: "linear-gradient(180deg, color-mix(in srgb, var(--amber) 94%, transparent) 0%, color-mix(in srgb, var(--amber) 98%, transparent) 100%)"
               }}
             >
-              {`${en ? "Reroll" : "Neu wuerfeln"} ${model.reroll.cost} M`}
+              {`${t("Neu wuerfeln", "Reroll", "引き直す")} ${model.reroll.cost} M`}
             </BigButton>
           ) : null}
         </div>
@@ -397,7 +409,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                   <div style={{ display: "grid", gap: 4 }}>
                     <strong>{offer.title}</strong>
                     <span style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>
-                      {formatLabel(offer.kind, en)}
+                      {formatLabel(offer.kind, model.language)}
                     </span>
                   </div>
                 </div>
@@ -476,10 +488,10 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                 }}
               >
                   {offer.purchased
-                    ? en ? "Bought" : "Gekauft"
+                    ? t("Gekauft", "Bought", "買った")
                     : offer.affordable
-                      ? en ? "Buy" : "Kaufen"
-                      : en ? "Too expensive" : "Zu teuer"}
+                      ? t("Kaufen", "Buy", "買う")
+                      : t("Zu teuer", "Too expensive", "お金が足りない")}
               </button>
             </article>
           ))}

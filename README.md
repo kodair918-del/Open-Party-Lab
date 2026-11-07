@@ -1,5 +1,17 @@
 # Open Party Lab
 
+> **日本語版について / About this fork**
+>
+> これは [Hartwich/Open-Party-Lab](https://github.com/Hartwich/Open-Party-Lab) (Apache-2.0) を日本語化した
+> フォークです。本家に対する変更は、対応言語に `ja` を足して本体 (ホスト画面・スマホのコントローラー・
+> サーバーからのメッセージ) を日本語にしたことと、既定言語を日本語にしたことです。ゲームのルール文や
+> お題は各ゲームのリポジトリ側にあるため、まだドイツ語・英語のものが残っています。
+>
+> This is a Japanese localization fork of [Hartwich/Open-Party-Lab](https://github.com/Hartwich/Open-Party-Lab)
+> (Apache-2.0). Changes against upstream: a `ja` language was added across the host, controller and server
+> messages, and it is now the default language. Per-game text lives in the separate game repositories and is
+> not translated yet.
+
 [Project website](https://hartwich.github.io/Open-Party-Lab/) — screenshots, ways to play and how to get involved.
 
 [Try the public test server](https://open-party-lab.onrender.com) · [Download for Windows](https://github.com/Hartwich/Open-Party-Lab/releases) · [Report an issue](https://github.com/Hartwich/Open-Party-Lab/issues)

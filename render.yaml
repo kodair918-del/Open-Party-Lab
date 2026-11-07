@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: open-party-lab
+    name: open-party-lab-ja
     runtime: node
     plan: free
-    region: frankfurt
+    region: singapore
     buildCommand: npm ci --include=dev && npm run games:clone-all -- --fresh && npm run build:hosted
     startCommand: node apps/server/dist/main.js
     healthCheckPath: /health

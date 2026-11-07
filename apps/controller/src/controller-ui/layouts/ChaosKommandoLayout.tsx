@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from "react";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import type { ChaosKommandoLayoutModel } from "./models.js";
+import { textPicker } from "@open-party-lab/protocol";
 
 interface StickVector {
   x: number;
@@ -237,7 +238,7 @@ const StickPad = memo(function StickPad({ label, accentColor, disabled, resetKey
 const chargeWindowMs = 1_750;
 
 export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel }) {
-  const en = model.language === "en";
+  const t = textPicker(model.language);
   const controlColor = model.accentColor ?? "#ae4938";
   const fireDisabled = model.fireDisabled ?? model.disabled;
   const [hudMode, setHudMode] = useState<"kommando" | "steuerung">("steuerung");
@@ -413,7 +414,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
           onClick={() => setHudMode("kommando")}
           style={modeToggleStyle(hudMode === "kommando", model.accentColor)}
         >
-          {en ? "ARSENAL" : "WAFFEN"}
+          {t("WAFFEN", "ARSENAL", "ぶき")}
         </button>
 
         <button
@@ -421,7 +422,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
           onClick={() => setHudMode("steuerung")}
           style={modeToggleStyle(hudMode === "steuerung", "var(--danger)")}
         >
-          {en ? "CONTROLS" : "STEUERUNG"}
+          {t("STEUERUNG", "CONTROLS", "そうさ")}
         </button>
       </div>
 
@@ -506,7 +507,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
         >
           <div style={{ display: "grid", justifyItems: "center" }}>
             <StickPad
-              label={en ? "WALK / ROPE" : "LAUFEN / SEIL"}
+              label={t("LAUFEN / SEIL", "WALK / ROPE", "いどう / ロープ")}
               accentColor={model.accentColor ?? "var(--accent)"}
               disabled={model.disabled}
               resetKey={model.resetKey}
@@ -595,14 +596,14 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                 letterSpacing: "0.06em"
               }}
             >
-              {en ? "HOP" : "SPRUNG"}
+              {t("SPRUNG", "HOP", "ジャンプ")}
             </button>
-            {model.onBackflip ? <button type="button" disabled={model.disabled} onClick={model.onBackflip} style={toggleStyle(false, model.accentColor)}>{en ? "BACKFLIP" : "SALTO"}</button> : null}
+            {model.onBackflip ? <button type="button" disabled={model.disabled} onClick={model.onBackflip} style={toggleStyle(false, model.accentColor)}>{t("SALTO", "BACKFLIP", "バク転")}</button> : null}
           </div>
 
           <div style={{ display: "grid", justifyItems: "center" }}>
             <StickPad
-              label={en ? "AIM" : "ZIELEN"}
+              label={t("ZIELEN", "AIM", "ねらう")}
               accentColor="var(--danger)"
               disabled={model.disabled}
               resetKey={model.resetKey}
@@ -617,7 +618,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
         <button type="button" disabled={model.ropeDisabled ?? model.disabled}
           onClick={() => { model.onRopeToggle?.(); setHudMode("steuerung"); }}
           style={toggleStyle(Boolean(model.ropeAttached), model.accentColor)}>
-          {model.ropeAttached ? en ? "RELEASE HOOK" : "HAKEN LOESEN" : en ? "HOOK" : "HAKEN"}
+          {model.ropeAttached ? t("HAKEN LOESEN", "RELEASE HOOK", "フックを外す") : t("HAKEN", "HOOK", "フック")}
         </button>
         <button type="button" disabled={model.disabled || !model.ropeAttached}
           aria-pressed={model.ropeReeling}
@@ -627,14 +628,14 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
           onKeyDown={(event) => { if ((event.key === " " || event.key === "Enter") && !event.repeat) { event.preventDefault(); model.onReelChange?.(-1); } }}
           onKeyUp={(event) => { if (event.key === " " || event.key === "Enter") model.onReelChange?.(0); }}
           style={{ ...toggleStyle(Boolean(model.ropeReeling), model.accentColor), touchAction: "none" }}>
-          {en ? "PULL UP (HOLD)" : "HOCHZIEHEN (HALTEN)"}
+          {t("HOCHZIEHEN (HALTEN)", "PULL UP (HOLD)", "ひきあげ（長押し）")}
         </button>
       </div> : null}
       {model.fuseSeconds !== undefined && model.onSetFuse ? <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-        <span>{en ? "Fuse" : "Zuender"}</span>
+        <span>{t("Zuender", "Fuse", "導火線")}</span>
         {[1, 2, 3, 4, 5].map((seconds) => <button key={seconds} type="button" disabled={model.fireDisabled ?? model.disabled} onClick={() => model.onSetFuse?.(seconds)} style={toggleStyle(seconds === model.fuseSeconds, model.accentColor)}>{seconds}s</button>)}
       </div> : null}
-      {model.onEndTurn ? <button type="button" disabled={model.disabled || !model.isLocalPlayersTurn} onClick={model.onEndTurn} style={toggleStyle(false, model.accentColor)}>{en ? "END TURN" : "ZUG BEENDEN"}</button> : null}
+      {model.onEndTurn ? <button type="button" disabled={model.disabled || !model.isLocalPlayersTurn} onClick={model.onEndTurn} style={toggleStyle(false, model.accentColor)}>{t("ZUG BEENDEN", "END TURN", "ターン終了")}</button> : null}
     </div>
   );
 }

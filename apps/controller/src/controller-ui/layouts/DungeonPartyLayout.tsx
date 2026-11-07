@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { useHaptics } from "../../hooks/useHaptics.js";
 import type { DungeonPartyHandCardModel, DungeonPartyLayoutModel } from "./models.js";
+import { textPicker, type SupportedLanguage } from "@open-party-lab/protocol";
 
 interface Props { model: DungeonPartyLayoutModel }
 
@@ -37,12 +38,12 @@ function CardIllustration({ card }: { card: DungeonPartyHandCardModel }) {
 }
 
 const diePips: number[][] = [[], [4], [0, 8], [0, 4, 8], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 2, 3, 5, 6, 8]];
-function PhoneDie({ value, en }: { value: number; en: boolean }) {
-  return <span className="dp-phone-die" role="img" aria-label={`${en ? "Die" : "Würfel"}: ${value}`}>{Array.from({ length: 9 }, (_, index) => <i key={index} className={diePips[value]?.includes(index) ? "on" : ""} />)}</span>;
+function PhoneDie({ value, language }: { value: number; language?: SupportedLanguage }) {
+  return <span className="dp-phone-die" role="img" aria-label={`${textPicker(language)("Würfel", "Die", "さいころ")}: ${value}`}>{Array.from({ length: 9 }, (_, index) => <i key={index} className={diePips[value]?.includes(index) ? "on" : ""} />)}</span>;
 }
 
 export function DungeonPartyLayout({ model }: Props) {
-  const en = model.language === "en";
+  const t = textPicker(model.language);
   const haptics = useHaptics();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [targetId, setTargetId] = useState<string | null>(null);
@@ -103,31 +104,31 @@ export function DungeonPartyLayout({ model }: Props) {
       @media(max-width:380px){.dp-phone{padding:10px}.dp-phone-card{flex-basis:112px;width:112px;height:158px}.dp-phone h2{font-size:23px}}
       @media(prefers-reduced-motion:reduce){.dp-phone-card,.dp-phone-verdict,.dp-phone-reward{animation:none!important;transition:none!important}}
     `}</style>
-    <header className="dp-phone-head"><div><small>{en ? "DUNGEON PARTY · NO TIMER" : "DUNGEON PARTY · OHNE ZEITLIMIT"}</small><h2>{model.title}</h2></div>{model.statusLabel ? <span className="dp-stage">{model.statusLabel}</span> : null}</header>
+    <header className="dp-phone-head"><div><small>{t("DUNGEON PARTY · OHNE ZEITLIMIT", "DUNGEON PARTY · NO TIMER", "ダンジョンパーティー · 時間制限なし")}</small><h2>{model.title}</h2></div>{model.statusLabel ? <span className="dp-stage">{model.statusLabel}</span> : null}</header>
     <p className="dp-phone-copy">{model.subtitle}<br />{model.helperText}</p>
     <section className="dp-phone-stats">{model.stats.map((stat) => <div className="dp-phone-stat" key={stat.label}><span>{stat.label}</span><b>{stat.value}</b></div>)}</section>
     {model.roomRule ? <aside className="dp-phone-rule"><i aria-hidden="true">{model.roomRule.symbol}</i><div><b>{model.roomRule.name}</b><span>{model.roomRule.description}</span></div></aside> : null}
-    {model.preparedPower > 0 ? <p className="dp-phone-scouts">⌖ +{model.preparedPower} {en ? "party power from scouts" : "Gruppenkraft durch Späher"}</p> : null}
+    {model.preparedPower > 0 ? <p className="dp-phone-scouts">⌖ +{model.preparedPower} {t("Gruppenkraft durch Späher", "party power from scouts", "偵察でふえたパーティーの力")}</p> : null}
 
     {model.mode === "planning" || model.mode === "voting" ? <section className="dp-phone-choices" aria-label={model.title}>
       {model.choices.map((choice) => <button type="button" className="dp-phone-choice" key={choice.id} onClick={choice.onSelect} disabled={choice.disabled || model.disabled}>{choice.symbol ? <i aria-hidden="true">{choice.symbol}</i> : null}<strong>{choice.label}</strong><span>{choice.description}</span></button>)}
     </section> : null}
 
-    {model.mode === "waiting" && model.pendingCard ? <div className="dp-phone-played"><span className="dp-phone-played-art"><CardIllustration card={model.pendingCard} /></span><span className="dp-phone-played-copy"><small>{en ? "CARD LOCKED IN" : "KARTE ABGEGEBEN"}</small><b>{model.pendingCard.name}</b><span>{model.pendingCard.targetName ? (en ? "Target" : "Ziel") + ": " + model.pendingCard.targetName : (en ? "Ready for the reveal" : "Wartet auf die Auflösung")}</span></span></div> : null}
+    {model.mode === "waiting" && model.pendingCard ? <div className="dp-phone-played"><span className="dp-phone-played-art"><CardIllustration card={model.pendingCard} /></span><span className="dp-phone-played-copy"><small>{t("KARTE ABGEGEBEN", "CARD LOCKED IN", "カードを出した")}</small><b>{model.pendingCard.name}</b><span>{model.pendingCard.targetName ? t("Ziel", "Target", "ねらい") + ": " + model.pendingCard.targetName : t("Wartet auf die Auflösung", "Ready for the reveal", "公開を待っている")}</span></span></div> : null}
 
     {model.scene !== "camp" && (model.mode === "response" || model.mode === "waiting" || model.mode === "planning") ? <section className="dp-phone-section">
-      <div className="dp-phone-section-head"><span>{model.handTitle}</span><em>{model.hand.length} {en ? "cards" : "Karten"}</em></div>
+      <div className="dp-phone-section-head"><span>{model.handTitle}</span><em>{model.hand.length} {t("Karten", "cards", "枚")}</em></div>
       <div className="dp-phone-hand" aria-label={model.handTitle}>
         {model.hand.length ? model.hand.map((card, index) => <button type="button" key={card.id} className={`dp-phone-card ${selectedId === card.id ? "is-selected" : ""}`} style={{ "--i": index, "--fan": `${Math.max(-9, Math.min(9, (index - (model.hand.length - 1) / 2) * 2.5))}deg`, "--tone": cardTone(card) } as CSSProperties} onClick={() => selectCard(card)} disabled={model.disabled || card.kind !== "effect"} aria-label={`${card.name}. ${card.description}`} aria-pressed={selectedId === card.id}>
-          <span className="dp-phone-card-top"><span>{card.kind === "effect" ? (en ? "ACTION" : "AKTION") : (en ? "GEAR" : "AUSRÜSTUNG")}</span><span>{glyphs[card.effect ?? "equipment"] ?? "✦"}</span></span>
+          <span className="dp-phone-card-top"><span>{card.kind === "effect" ? t("AKTION", "ACTION", "アクション") : t("AUSRÜSTUNG", "GEAR", "そうび")}</span><span>{glyphs[card.effect ?? "equipment"] ?? "✦"}</span></span>
           <span className="dp-phone-card-art"><CardIllustration card={card} /></span>
           <span className="dp-phone-card-name">{card.name}</span><span className="dp-phone-card-desc">{card.description}</span>
-        </button>) : <span className="dp-phone-wait">{en ? "Your hand is empty." : "Deine Hand ist leer."}</span>}
+        </button>) : <span className="dp-phone-wait">{t("Deine Hand ist leer.", "Your hand is empty.", "手札が無い。")}</span>}
       </div>
       {selected ? <aside className="dp-phone-card-detail"><CardIllustration card={selected} /><div><b>{selected.name}</b><p>{selected.description}</p></div></aside> : null}
       {!model.handPlayable && model.handHint ? <div className="dp-phone-wait">{model.handHint}</div> : null}
       {model.mode === "response" ? <>
-        {selected && targetRequired ? <div className="dp-phone-targets" aria-label={en ? "Choose a target" : "Ziel auswählen"}>{validTargets.map((target) => <button type="button" key={target.id} className={`dp-phone-target ${targetId === target.id ? "selected" : ""}`} aria-pressed={targetId === target.id} onClick={() => setTargetId(target.id)}>{target.name}</button>)}</div> : null}
+        {selected && targetRequired ? <div className="dp-phone-targets" aria-label={t("Ziel auswählen", "Choose a target", "ねらいを選ぶ")}>{validTargets.map((target) => <button type="button" key={target.id} className={`dp-phone-target ${targetId === target.id ? "selected" : ""}`} aria-pressed={targetId === target.id} onClick={() => setTargetId(target.id)}>{target.name}</button>)}</div> : null}
         <div className="dp-phone-buttons"><button type="button" className="dp-phone-button" onClick={playSelected} disabled={!selected || (targetRequired && !targetId)}>{model.playLabel}</button><button type="button" className="dp-phone-button secondary" onClick={model.onPass}>{model.passLabel}</button></div>
       </> : null}
     </section> : null}
@@ -136,13 +137,13 @@ export function DungeonPartyLayout({ model }: Props) {
     {model.mode === "reveal" || model.mode === "complete" || model.readyPhase ? <section className="dp-phone-recap">
       {model.campResults?.map((entry) => <article className="dp-phone-camp-result" key={entry.playerName}><b>{entry.symbol} {entry.playerName} · {entry.action}</b><span>{entry.healthDelta > 0 ? `♥ +${entry.healthDelta} ` : ""}{entry.goldDelta !== 0 ? `¤ ${entry.goldDelta} ` : ""}{entry.powerDelta > 0 ? `⚔ +${entry.powerDelta}` : ""}</span>{entry.cards.map((card) => <small key={card.id}>▱ {card.name}</small>)}</article>)}
       {model.resolution ? <>
-        <div className="dp-phone-verdict"><b>{model.resolution.success ? (en ? "SUCCESS" : "GESCHAFFT") : (en ? "FAILED" : "GESCHEITERT")}</b><strong>{model.resolution.partyPower} / {model.resolution.targetDifficulty}</strong></div>
-        {model.resolution.sharedPower !== 0 || model.resolution.difficultyModifier !== 0 ? <div className="dp-phone-feed">{en ? "Cards & scouts" : "Karten & Späher"}: {model.resolution.sharedPower > 0 ? "+" : ""}{model.resolution.sharedPower} ⚔ · {en ? "Target modifier" : "Zielwert-Änderung"}: {model.resolution.difficultyModifier > 0 ? "+" : ""}{model.resolution.difficultyModifier}</div> : null}
+        <div className="dp-phone-verdict"><b>{model.resolution.success ? t("GESCHAFFT", "SUCCESS", "成功") : t("GESCHEITERT", "FAILED", "失敗")}</b><strong>{model.resolution.partyPower} / {model.resolution.targetDifficulty}</strong></div>
+        {model.resolution.sharedPower !== 0 || model.resolution.difficultyModifier !== 0 ? <div className="dp-phone-feed">{t("Karten & Späher", "Cards & scouts", "カードと偵察")}: {model.resolution.sharedPower > 0 ? "+" : ""}{model.resolution.sharedPower} ⚔ · {t("Zielwert-Änderung", "Target modifier", "目標値の変化")}:{model.resolution.difficultyModifier > 0 ? "+" : ""}{model.resolution.difficultyModifier}</div> : null}
         {model.resolution.cards.map((card) => <div className="dp-phone-feed" key={card}>{card}</div>)}
-        {model.resolution.rewards.map((reward) => <div className="dp-phone-reward" key={`${reward.playerName}-${reward.card.id}`}><span className="dp-phone-reward-art"><CardIllustration card={reward.card} /></span><span><small>{reward.playerName} · {reward.source === "boss" ? (en ? "BOSS REWARD" : "BOSSBELOHNUNG") : reward.card.kind === "equipment" ? (en ? "EQUIPPED" : "ANGELEGT") : (en ? "NEW HAND CARD" : "NEUE HANDKARTE")}</small><b>{reward.card.name}</b><em>{reward.card.description}</em></span></div>)}
-        {model.resolution.heroes.map((hero) => <div className="dp-phone-row" key={hero.name}><strong>{hero.name} · {hero.action}<span className="dp-phone-dice">{hero.originalRoll ? <><PhoneDie value={hero.originalRoll} en={en} /> → </> : null}<PhoneDie value={hero.roll} en={en} /><span>+{hero.contribution} {en ? "power" : "Kraft"}</span></span></strong><span className="dp-phone-deltas">♥ {hero.healthDelta} · ✦ {hero.fameDelta} · ¤ {hero.goldDelta}</span>{hero.outcome ? <small>{hero.outcome}</small> : null}</div>)}
+        {model.resolution.rewards.map((reward) => <div className="dp-phone-reward" key={`${reward.playerName}-${reward.card.id}`}><span className="dp-phone-reward-art"><CardIllustration card={reward.card} /></span><span><small>{reward.playerName} · {reward.source === "boss" ? t("BOSSBELOHNUNG", "BOSS REWARD", "ボス報酬") : reward.card.kind === "equipment" ? t("ANGELEGT", "EQUIPPED", "装備した") : t("NEUE HANDKARTE", "NEW HAND CARD", "新しい手札")}</small><b>{reward.card.name}</b><em>{reward.card.description}</em></span></div>)}
+        {model.resolution.heroes.map((hero) => <div className="dp-phone-row" key={hero.name}><strong>{hero.name} · {hero.action}<span className="dp-phone-dice">{hero.originalRoll ? <><PhoneDie value={hero.originalRoll} language={model.language} /> → </> : null}<PhoneDie value={hero.roll} language={model.language} /><span>+{hero.contribution} {t("Kraft", "power", "力")}</span></span></strong><span className="dp-phone-deltas">♥ {hero.healthDelta} · ✦ {hero.fameDelta} · ¤ {hero.goldDelta}</span>{hero.outcome ? <small>{hero.outcome}</small> : null}</div>)}
       </> : null}
-      {model.readyPhase ? <div className="dp-phone-foot"><div className="dp-phone-wait">{isReady ? (en ? "You're ready. The recap stays here while the group catches up." : "Du bist bereit. Die Zusammenfassung bleibt sichtbar, bis alle soweit sind.") : model.handHint}</div><button type="button" className={`dp-phone-button ${isReady ? "dp-phone-ready" : ""}`} onClick={ready} disabled={isReady} aria-pressed={isReady}>{isReady ? model.readyLabel : (en ? "Ready" : "Bereit")}</button></div> : null}
+      {model.readyPhase ? <div className="dp-phone-foot"><div className="dp-phone-wait">{isReady ? t("Du bist bereit. Die Zusammenfassung bleibt sichtbar, bis alle soweit sind.", "You're ready. The recap stays here while the group catches up.", "準備OK。みんながそろうまで、まとめはここに残る。") : model.handHint}</div><button type="button" className={`dp-phone-button ${isReady ? "dp-phone-ready" : ""}`} onClick={ready} disabled={isReady} aria-pressed={isReady}>{isReady ? model.readyLabel : t("Bereit", "Ready", "準備OK")}</button></div> : null}
     </section> : null}
     {model.teamFeed.length > 0 && model.mode !== "reveal" && model.mode !== "complete" ? <section className="dp-phone-feed">{model.teamFeed.map((line) => <div key={line}>{line}</div>)}</section> : null}
   </main>;

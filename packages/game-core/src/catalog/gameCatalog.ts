@@ -1,5 +1,34 @@
 ﻿import type { GameManifest } from "../types/GameManifest.js";
-import { defaultLanguage, normalizeLanguage, type SupportedLanguage } from "../i18n/language.js";
+import type { LocalizedGameText } from "../i18n/text.js";
+import {
+  defaultLanguage,
+  normalizeLanguage,
+  supportedLanguages,
+  type SupportedLanguage
+} from "../i18n/language.js";
+
+/**
+ * Picks the best available translation for a manifest.
+ *
+ * A game repository only ships the languages its author wrote, so a requested
+ * language is often missing. English is tried before the remaining languages
+ * because it is the most widely readable fallback.
+ */
+function resolveGameText(
+  manifest: GameManifest,
+  language: SupportedLanguage
+): LocalizedGameText | undefined {
+  const candidates: SupportedLanguage[] = [language, "en", defaultLanguage, ...supportedLanguages];
+
+  for (const candidate of candidates) {
+    const text = manifest.translations?.[candidate];
+    if (text) {
+      return text;
+    }
+  }
+
+  return undefined;
+}
 
 export const gameCatalog: readonly GameManifest[] = [];
 
@@ -15,7 +44,7 @@ export function localizeGameManifest(
   manifest: GameManifest,
   language: SupportedLanguage = defaultLanguage
 ): GameManifest {
-  const text = manifest.translations?.[normalizeLanguage(language)] ?? manifest.translations?.[defaultLanguage];
+  const text = resolveGameText(manifest, normalizeLanguage(language));
 
   if (!text) {
     return manifest;

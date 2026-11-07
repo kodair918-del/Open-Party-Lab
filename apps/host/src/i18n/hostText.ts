@@ -388,6 +388,146 @@ const hostText = {
           return phase;
       }
     }
+  },
+  ja: {
+    shellKicker: "ゲームを選ぶ",
+    shellTitle: "なにで遊ぶ？",
+    shellSetupKicker: "設定",
+    shellStartRound: "ラウンド開始",
+    shellRoundRunning: "ラウンド中",
+    shellBackToCatalog: "ゲーム一覧へ",
+    shellRosterEmpty: "まだ誰もいない。コードを読み取って参加。",
+    shellNeedsPlayers: (missing: number) =>
+      missing === 1 ? "あと1人必要。" : `あと${missing}人必要。`,
+    shellReadyCount: (ready: number, total: number) => `${total}人中 ${ready}人が準備OK`,
+    roomExpiryTitle: "部屋がもうすぐ閉まる",
+    roomExpiryBody: (minutes: number) => `この部屋はあと約${minutes}分で閉まる。`,
+    roomExpiryExtend: "1時間延長する",
+    roomExpiryExtending: "延長している...",
+    roomExpiryExtended: "部屋を1時間延長した。",
+    roomExpiryCountdown: (time: string) => `この部屋は ${time} で閉まる。`,
+    roundPausedTitle: "ラウンド一時停止",
+    roundPausedByPlayer: (name: string) => `${name} がホストメニューを開いた。`,
+    roundPausedByScreen: "ホストメニューが開いている。",
+    roundPausedHint: "メニューを閉じれば再開する。",
+    hostControlRequestTitle: "操作を渡す？",
+    hostControlRequestBody: (name: string) => `${name} がホストを操作したいと言っている。`,
+    hostControlRequestHint: "ゲーム選択・ラウンド開始・プレイヤー管理がスマホに移る。",
+    hostControlAllow: "許可する",
+    hostControlDeny: "断る",
+    hostControlDelegatedTitle: "スマホが操作中",
+    hostControlDelegatedBody: (name: string) => `${name} がホストを操作している。`,
+    hostControlReclaim: "取り戻す",
+    languageLabel: "言語",
+    themeLabel: "配色",
+    themeLight: "ライト",
+    themeDark: "ダーク",
+    phoneController: "スマホコントローラー",
+    showPhoneController: "スマホコントローラーを表示",
+    hide: "隠す",
+    fullscreen: "全画面",
+    exitFullscreen: "全画面をやめる",
+    fpsLabel: "FPS",
+    musicVolumeLabel: "音楽",
+    soundEffectsVolumeLabel: "効果音",
+    hostControlsTitle: "ホスト設定",
+    hostControlsSubtitle: "音・画面・言語・プレイヤー",
+    close: "閉じる",
+    noGame: "ゲームなし",
+    connected: "接続中",
+    waitingForRoom: "部屋を待っている",
+    offline: "オフライン",
+    connectionMissing: "接続がない",
+    players: "プレイヤー",
+    playerRange: (min: number, max: number) => `${min}〜${max}人`,
+    selected: "選択中",
+    lobby: "ロビー",
+    connectedShort: "接続中",
+    noPlayersJoined: "まだ誰も参加していない。",
+    noPlayersConnected: "まだ誰もつながっていない。",
+    roomListPending: "部屋ができるとここにプレイヤー一覧が出る。",
+    moderationAllowed: "ロビー中かラウンドの合間なら、プレイヤーを退出させられる。",
+    moderationLocked: "ラウンド中は退出させられない。",
+    ready: "準備OK",
+    waiting: "待っている",
+    reconnecting: "再接続中",
+    notReady: "まだ",
+    kick: "退出",
+    kickPlayer: (name: string) => `${name} を退出させる`,
+    roomCode: "部屋コード",
+    join: "参加",
+    lobbyTitle: "パーティーロビー",
+    lobbyPlayersTitle: "ロビーのプレイヤー",
+    quickStartTitle: "かんたん操作",
+    quickStartLines: [
+      "クリックか数字キーでゲームを選ぶ。",
+      "そのあと自動か SPACE で開始。"
+    ],
+    gameSelectionFallback: "ゲーム選択",
+    gameSelectRoundActiveSubtitle:
+      "ゲーム一覧を開いている。ラウンド中は選択と開始ができない。",
+    gameSelectAutoReadySubtitle:
+      "マウスか数字キーでゲームを切り替える。準備OK式のラウンドは自動で始まる。",
+    gameSelectClassicSubtitle:
+      "マウスか数字キーでゲームを切り替える。通常のラウンドは SPACE で始まる。",
+    playerStatusTitle: "プレイヤーの状態",
+    noActiveGameTitle: "まだゲームが始まっていない",
+    noActiveGameSelectLine: "上のゲームカードから選ぶ。",
+    noActiveGameRoundActiveLine:
+      "いまのラウンドがまだ続いている。終われば、ここで次のゲームを選べる。",
+    noActiveGameStartLine:
+      "そのあとは、ゲームによって準備OKで自動か、いつもの SPACE でラウンドが始まる。",
+    playersConnected: (count: number, max: number) => `接続中のプレイヤー: ${count}/${max}`,
+    activeRoundLockedLine:
+      "ラウンドが進行中。一覧は見えているが、ラウンドが終わるまで選べない。",
+    setupChoicePendingLine: "まず全員が選択を済ませる必要がある。",
+    autoReadyLine: "全員がスマホで準備OKにする必要がある。",
+    spaceStartLine: "人数が揃ったら SPACE でラウンドが始まる。",
+    setupControlsLine: "このゲームには、ここで設定できる項目がある。",
+    afterRoundSwitchLine: "ラウンドが終われば、また自由に切り替えられる。",
+    autoStartsWhenReadyLine: "全員がまた準備OKになれば、ラウンドは自動で始まる。",
+    readyVisibleLine: "準備OKと開始の状態はここに出たままになる。",
+    setupFollowsTitle: "次は設定",
+    readyToStartTitle: "開始できる",
+    backToMenu: "メインメニューへ",
+    backToMenuShort: "メニュー",
+    gameLobbySubtitle: "ラウンドを設定して、みんなで始める。",
+    gameLobbySetupTitle: "ラウンド設定",
+    characterSelecting: "キャラを選んでいる",
+    morePlayers: (count: number) => `ほか${count}人`,
+    errorLabel: "エラー",
+    roomPrefix: "部屋",
+    hostCreatingRoom: "部屋を作っている ...",
+    hostConnecting: "ホストをサーバーにつないでいる ...",
+    scanQr: "QRを読み取るか、リンクをスマホで開く",
+    hostPageHint: "スマホでは、画面に出ているコントローラーのリンクかQRを必ず使う。",
+    serverOnline: "サーバー稼働中",
+    serverOffline: "サーバー停止中",
+    readyNextTitle: "次のラウンドの準備OK",
+    lifecycle: (phase: RoomLifecycle | string) => {
+      switch (phase) {
+        case "lobby":
+          return "ロビー";
+        case "game_selected":
+          return "ゲーム選択済み";
+        case "round_intro":
+          return "イントロ";
+        case "countdown":
+          return "カウントダウン";
+        case "playing":
+          return "プレイ中";
+        case "locked":
+          return "ロック中";
+        case "result":
+          return "結果";
+        case "scoreboard":
+          return "スコア";
+        case "finished":
+          return "終了";
+        default:
+          return phase;
+      }
+    }
   }
 } satisfies Record<SupportedLanguage, HostText>;
 

@@ -1,4 +1,5 @@
 import { logger } from "../core/logger/logger.js";
+import { textPicker, type SupportedLanguage } from "@open-party-lab/protocol";
 import type {
   ClientToServerEvents,
   InterServerEvents,
@@ -109,7 +110,7 @@ export class RoomCleanupService {
   }
 
   private closeRoom(room: RoomRecord, reason: RoomClosedReason): void {
-    const message = this.closeMessage(room.language === "en", reason);
+    const message = this.closeMessage(room.language, reason);
 
     this.io.to(room.code).emit("room:closed", {
       roomCode: room.code,
@@ -135,21 +136,29 @@ export class RoomCleanupService {
     logger.info("Closed room.", { roomCode: room.code, reason });
   }
 
-  private closeMessage(en: boolean, reason: RoomClosedReason): string {
+  private closeMessage(language: SupportedLanguage, reason: RoomClosedReason): string {
+    const t = textPicker(language);
+
     if (reason === "expired") {
-      return en
-        ? "This room reached its one-hour limit and was closed."
-        : "Dieser Raum hat sein Ein-Stunden-Limit erreicht und wurde geschlossen.";
+      return t(
+        "Dieser Raum hat sein Ein-Stunden-Limit erreicht und wurde geschlossen.",
+        "This room reached its one-hour limit and was closed.",
+        "この部屋は1時間の上限に達したので閉じた。"
+      );
     }
 
     if (reason === "capacity") {
-      return en
-        ? "This room had no active players and was closed to make space for a new room."
-        : "Dieser Raum hatte keine aktiven Spieler und wurde geschlossen, um Platz für einen neuen Raum zu schaffen.";
+      return t(
+        "Dieser Raum hatte keine aktiven Spieler und wurde geschlossen, um Platz für einen neuen Raum zu schaffen.",
+        "This room had no active players and was closed to make space for a new room.",
+        "この部屋は遊んでいる人がいなかったので、新しい部屋のために閉じた。"
+      );
     }
 
-    return en
-      ? "This room was closed after ten minutes without activity."
-      : "Dieser Raum wurde nach zehn Minuten ohne Aktivität geschlossen.";
+    return t(
+      "Dieser Raum wurde nach zehn Minuten ohne Aktivität geschlossen.",
+      "This room was closed after ten minutes without activity.",
+      "この部屋は10分なにも動きがなかったので閉じた。"
+    );
   }
 }

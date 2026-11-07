@@ -5,6 +5,7 @@ import { MatchingSymbolIcon, PlayingCard } from "./cardArt.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import type { CardHandLayoutModel } from "./models.js";
 import type { CardTableActionState, CardTableHandCardState } from "@open-party-lab/protocol";
+import { textPicker } from "@open-party-lab/protocol";
 import { SymboljagdLayout } from "./SymboljagdLayout.js";
 
 /**
@@ -77,7 +78,7 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
 function StandardCardHandLayout({ model }: CardHandLayoutProps) {
   const haptics = useHaptics();
   const orientation = useOrientationHint();
-  const en = model.language === "en";
+  const t = textPicker(model.language);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [choiceCardId, setChoiceCardId] = useState<string | null>(null);
   const [handRef, handBox] = useBoxSize();
@@ -158,14 +159,17 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
         }}
       >
         <strong style={{ fontFamily: "var(--font-display)", fontSize: "1.05rem" }}>
-          {en ? "Round over" : "Runde vorbei"}
+          {t("Runde vorbei", "Round over", "ラウンド終了")}
         </strong>
         <span style={{ color: "var(--muted)", fontSize: "0.86rem" }}>
           {model.winnerName
-            ? `${en ? "Winner" : "Sieger"}: ${model.winnerName}`
-            : en
-              ? "The result is on the shared screen."
-              : "Die Auswertung steht auf dem großen Bildschirm."}
+            ? `${t("Sieger", "Winner", "勝ち")}: ${model.winnerName}`
+
+            : t(
+                "Die Auswertung steht auf dem großen Bildschirm.",
+                "The result is on the shared screen.",
+                "結果は大きい画面に出ている。"
+              )}
         </span>
         {model.ready ? <ReadyPanel ready={model.ready} /> : null}
       </div>
@@ -288,7 +292,7 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
                   color: "var(--muted)"
                 }}
               >
-                {en ? "No cards left." : "Keine Karten mehr."}
+                {t("Keine Karten mehr.", "No cards left.", "カードがもう無い。")}
               </span>
             ) : null}
           </div>
@@ -313,7 +317,7 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
             touchAction: "manipulation"
           }}
         >
-          {en ? "Play" : "Legen"}
+          {t("Legen", "Play", "出す")}
         </button>
 
         <div style={{ display: "contents" }}>
@@ -366,7 +370,7 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
             zIndex: 60
           }}
         >
-          {en ? "Turn your phone sideways." : "Halte dein Handy quer."}
+          {t("Halte dein Handy quer.", "Turn your phone sideways.", "スマホを横向きにして。")}
         </div>
       ) : null}
 
@@ -440,7 +444,7 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
                 fontWeight: 600
               }}
             >
-              {en ? "Cancel" : "Abbrechen"}
+              {t("Abbrechen", "Cancel", "やめる")}
             </button>
           </div>
         </div>

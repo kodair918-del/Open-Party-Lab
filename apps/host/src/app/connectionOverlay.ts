@@ -1,3 +1,4 @@
+import { textPicker } from "@open-party-lab/protocol";
 import type { HostSocketClient } from "./hostSocketClient.js";
 
 export function mountConnectionOverlay(client: HostSocketClient): () => void {
@@ -8,9 +9,11 @@ export function mountConnectionOverlay(client: HostSocketClient): () => void {
   document.body.append(banner);
   const unsubscribe = client.subscribe((state) => {
     banner.hidden = state.connected || !state.room;
-    banner.textContent = state.preferredLanguage === "en"
-      ? "Connection lost. Reconnecting to your room automatically…"
-      : "Verbindung unterbrochen. Dein Raum wird automatisch wieder verbunden…";
+    banner.textContent = textPicker(state.preferredLanguage)(
+      "Verbindung unterbrochen. Dein Raum wird automatisch wieder verbunden…",
+      "Connection lost. Reconnecting to your room automatically…",
+      "接続が切れた。部屋に自動でつなぎ直している…"
+    );
   });
   return () => { unsubscribe(); banner.remove(); };
 }

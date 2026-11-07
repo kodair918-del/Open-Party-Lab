@@ -1,4 +1,5 @@
 import type { ClientToServerEvents, ServerToClientEvents, SupportedLanguage } from "@open-party-lab/protocol";
+import { languageLabels, supportedLanguages } from "@open-party-lab/protocol";
 import { defaultThemeName, themeCssVariablesFor } from "@open-party-lab/ui-kit";
 import { io, type Socket } from "socket.io-client";
 import { readStoredHostLanguage, writeStoredHostLanguage } from "../i18n/hostText.js";
@@ -57,9 +58,36 @@ const landingText = {
     closedInactive: "The previous room was closed after ten minutes without activity.",
     closedExpired: "The previous room was closed automatically after one hour.",
     closedCapacity: "The previous room had no active players and was closed to make space for a new room.",
+    switchLanguage: "Switch to Japanese"
+  },
+  ja: {
+    title: "Open Party Lab – 部屋を作る",
+    kicker: "テレビは1台。スマホはみんなの分。部屋はひとつ。",
+    heading: "パーティーは",
+    headingAccent: "君の部屋から始まる。",
+    intro: "この画面で新しい部屋を作る。もう誰かが作った部屋には、スマホから入る。",
+    create: "新しい部屋を作る",
+    createHint: "この画面がホストになる",
+    or: "または",
+    join: "できている部屋に入る",
+    roomCode: "部屋コード",
+    joinButton: "入る",
+    joinHint: "この部屋のスマホコントローラーが開く。",
+    ready: "準備OK。",
+    creating: "部屋を作っている …",
+    unavailable: "いまサーバーにつながらない。もう一度試して。",
+    invalidCode: "4文字の部屋コードを入れて。",
+    closedInactive: "前の部屋は、10分なにも動きがなかったので閉じた。",
+    closedExpired: "前の部屋は、1時間たったので自動で閉じた。",
+    closedCapacity: "前の部屋は遊んでいる人がいなかったので、新しい部屋のために閉じた。",
     switchLanguage: "Auf Deutsch wechseln"
   }
 } as const;
+
+function nextLanguage(current: SupportedLanguage): SupportedLanguage {
+  const index = supportedLanguages.indexOf(current);
+  return supportedLanguages[(index + 1) % supportedLanguages.length];
+}
 
 function normalizeRoomCode(value: string): string {
   return value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
@@ -100,7 +128,7 @@ export function mountHostedLanding(): void {
       </section>
       <aside class="hosted-art" aria-hidden="true">
         <div class="hosted-orbit orbit-one"></div><div class="hosted-orbit orbit-two"></div>
-        <div class="hosted-code-card"><small>RAUMCODE</small><strong>PLAY</strong><span>● ● ●</span></div>
+        <div class="hosted-code-card"><small data-text="roomCode">RAUMCODE</small><strong>PLAY</strong><span>● ● ●</span></div>
       </aside>
     </main>
   `;
@@ -171,7 +199,10 @@ export function mountHostedLanding(): void {
     }
 
     if (roomInput) roomInput.placeholder = text.roomCode;
-    if (languageButton) languageButton.ariaLabel = text.switchLanguage;
+    if (languageButton) {
+      languageButton.textContent = languageLabels[nextLanguage(language)];
+      languageButton.ariaLabel = text.switchLanguage;
+    }
 
     if (closedReason === "inactive") setStatus(text.closedInactive);
     if (closedReason === "expired") setStatus(text.closedExpired);
@@ -189,7 +220,7 @@ export function mountHostedLanding(): void {
   });
 
   languageButton?.addEventListener("click", () => {
-    language = language === "de" ? "en" : "de";
+    language = nextLanguage(language);
     writeStoredHostLanguage(language);
     renderLanguage();
   });

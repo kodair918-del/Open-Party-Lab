@@ -5,7 +5,7 @@ import type {
   TwinStickLayoutModel,
   VirtualJoystickLayoutModel
 } from "./models.js";
-import type { SupportedLanguage } from "@open-party-lab/protocol";
+import { defaultLanguage, textPicker, type SupportedLanguage } from "@open-party-lab/protocol";
 import { getControllerText } from "../../i18n/controllerText.js";
 
 export type StandardControllerPresetId =
@@ -55,10 +55,23 @@ const englishPresetDescriptions: Record<StandardControllerPresetId, string> = {
   dpad_abcd: "Four direction buttons on the left and four action buttons on the right."
 };
 
-export function listStandardControllerPresets(language: SupportedLanguage = "de"): StandardControllerPresetDefinition[] {
+const japanesePresetDescriptions: Record<StandardControllerPresetId, string> = {
+  joystick_a: "左にアナログスティック、右に大きいボタン1個。",
+  joystick_abcd: "左にアナログスティック、右にボタン4個。",
+  dual_joystick: "左スティックで移動、右スティックで照準か視点。",
+  dpad_abcd: "左に方向ボタン4個、右にアクションボタン4個。"
+};
+
+export function listStandardControllerPresets(
+  language: SupportedLanguage = defaultLanguage
+): StandardControllerPresetDefinition[] {
   return standardControllerPresetCatalog.map((preset) => ({
     ...preset,
-    description: language === "en" ? englishPresetDescriptions[preset.id] : preset.description
+    description: textPicker(language)(
+      preset.description,
+      englishPresetDescriptions[preset.id],
+      japanesePresetDescriptions[preset.id]
+    )
   }));
 }
 

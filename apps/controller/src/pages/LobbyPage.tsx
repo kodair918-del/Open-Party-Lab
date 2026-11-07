@@ -484,7 +484,7 @@ export function LobbyPage({
 
   return (
     <ControllerFrame
-      title={`Lobby ${room?.code ?? "----"}`}
+      title={`${text.lobbyTitle} ${room?.code ?? "----"}`}
       subtitle={room?.selectedGameId ? text.lobbySelected(selectedGameName) : text.lobbyWaitingHost}
       footer={error ? <p style={{ color: "var(--danger)", margin: 0 }}>{error}</p> : null}
     >

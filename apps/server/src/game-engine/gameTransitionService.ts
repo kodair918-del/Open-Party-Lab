@@ -1,6 +1,7 @@
 import {
   resolveRoundPhaseTimings,
   roundPhaseDurations,
+  textPicker,
   transitionRoundState,
   type BaseRoundState,
   type ServerGameContext
@@ -42,14 +43,16 @@ export class GameTransitionService {
     const context = buildContext(deltaMs);
     const now = context.now;
     const selectedGameName = context.selectedGame.displayName;
+    const t = textPicker(context.language);
 
     if (state.phase === "round_intro" && state.phaseEndsAt !== null && now >= state.phaseEndsAt) {
       state = transitionRoundState(state, "countdown", now, {
         durationMs: phaseDurations.countdownMs,
-        message:
-          context.language === "en"
-            ? `${selectedGameName} starts soon.`
-            : `${selectedGameName} startet gleich.`
+        message: t(
+          `${selectedGameName} startet gleich.`,
+          `${selectedGameName} starts soon.`,
+          `${selectedGameName} がもうすぐ始まる。`
+        )
       });
       stateChanged = true;
     }
@@ -71,7 +74,7 @@ export class GameTransitionService {
     if (state.phase === "playing" && game.isRoundFinished(state as never, buildContext(deltaMs))) {
       state = transitionRoundState(state, "locked", now, {
         durationMs: phaseDurations.lockedMs,
-        message: state.message ?? (context.language === "en" ? "Round locked." : "Runde gesperrt.")
+        message: state.message ?? t("Runde gesperrt.", "Round locked.", "ラウンド終了。")
       });
       stateChanged = true;
     }
@@ -102,11 +105,15 @@ export class GameTransitionService {
         state =
           entry.manifest.roundCompletionMode === "wait_for_ready"
             ? transitionRoundState(state, "finished", now, {
-                message: state.message ?? (context.language === "en" ? "Ready for the next round" : "Bereit fuer die naechste Runde")
+                message: state.message ?? t(
+                  "Bereit fuer die naechste Runde",
+                  "Ready for the next round",
+                  "次のラウンドの準備OK"
+                )
               })
             : transitionRoundState(state, "result", now, {
                 durationMs: phaseDurations.resultMs,
-                message: state.message ?? (context.language === "en" ? "Result" : "Ergebnis")
+                message: state.message ?? t("Ergebnis", "Result", "結果")
               });
         this.roundManager.replaceState(room, state);
         stateChanged = true;
@@ -116,7 +123,7 @@ export class GameTransitionService {
     if (state.phase === "result" && state.phaseEndsAt !== null && now >= state.phaseEndsAt) {
       state = transitionRoundState(state, "scoreboard", now, {
         durationMs: phaseDurations.scoreboardMs,
-        message: context.language === "en" ? "Scoreboard" : "Punktestand"
+        message: t("Punktestand", "Scoreboard", "スコア")
       });
       this.roundManager.replaceState(room, state);
       stateChanged = true;
@@ -124,7 +131,7 @@ export class GameTransitionService {
 
     if (state.phase === "scoreboard" && state.phaseEndsAt !== null && now >= state.phaseEndsAt) {
       state = transitionRoundState(state, "finished", now, {
-        message: context.language === "en" ? "Round finished" : "Runde beendet"
+        message: t("Runde beendet", "Round finished", "ラウンド終了")
       });
       this.roundManager.replaceState(room, state);
       stateChanged = true;

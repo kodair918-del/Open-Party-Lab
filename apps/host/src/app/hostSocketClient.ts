@@ -10,7 +10,7 @@ import type {
 } from "@open-party-lab/protocol";
 import { io, type Socket } from "socket.io-client";
 import { ServerClock, startServerClockSync } from "@open-party-lab/game-core";
-import { hasActiveRound } from "@open-party-lab/protocol";
+import { hasActiveRound, normalizeLanguage, textPicker } from "@open-party-lab/protocol";
 import { readStoredHostLanguage, writeStoredHostLanguage } from "../i18n/hostText.js";
 import { hostGameRegistry } from "../games/registry.js";
 import { applyHostTheme } from "../ui/theme/theme.js";
@@ -311,14 +311,22 @@ export class HostSocketClient {
 
   async extendRoomLifetime(): Promise<string | null> {
     const roomCode = this.state.room?.code;
-    const en = this.state.room?.language === "en";
+    const t = textPicker(normalizeLanguage(this.state.room?.language));
     if (!roomCode || !this.socket.connected) {
-      return en ? "No connection. Please try again." : "Keine Verbindung. Bitte erneut versuchen.";
+      return t(
+        "Keine Verbindung. Bitte erneut versuchen.",
+        "No connection. Please try again.",
+        "つながっていない。もう一度試して。"
+      );
     }
     return new Promise((resolve) => {
       this.socket.timeout(8_000).emit("room:extend-lifetime", { roomCode }, (error, result) => {
         if (error) {
-          resolve(en ? "No response. Please try again." : "Keine Antwort. Bitte erneut versuchen.");
+          resolve(t(
+            "Keine Antwort. Bitte erneut versuchen.",
+            "No response. Please try again.",
+            "返事がない。もう一度試して。"
+          ));
           return;
         }
         if (!result.ok) {

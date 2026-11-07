@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+
 import { useHaptics } from "../../hooks/useHaptics.js";
+import { textPicker, type SupportedLanguage } from "@open-party-lab/protocol";
 import type {
   TowerDefenseCatalogEnemyModel,
   TowerDefenseCatalogTowerModel,
@@ -20,9 +22,10 @@ function resolveCellKey(col: number, row: number): string {
   return `${col}:${row}`;
 }
 
-function resolveTowerStatusText(tower: TowerDefenseTowerModel | null, en: boolean): string {
+
+function resolveTowerStatusText(tower: TowerDefenseTowerModel | null, language?: SupportedLanguage): string {
   if (!tower) {
-    return en ? "Free build slot" : "Freier Bauplatz";
+    return textPicker(language)("Freier Bauplatz", "Free build slot", "空いている建設マス");
   }
 
   return `Lv.${tower.level} | ${formatNumber(tower.damage)} DMG | ${formatNumber(tower.range)} Range`;
@@ -54,8 +57,9 @@ function BuildBlueprint({
   selectedSlotId,
   rangeOverlay,
   disabled,
+
   accentColor,
-  en,
+  language,
   onSelect
 }: {
   map: TowerDefenseMapModel;
@@ -67,10 +71,12 @@ function BuildBlueprint({
     color: string;
   } | null;
   disabled: boolean;
+
   accentColor?: string;
-  en: boolean;
+  language?: SupportedLanguage;
   onSelect: (slotId: string) => void;
 }) {
+  const t = textPicker(language);
   const pathCells = new Set(map.pathCells.map((cell) => resolveCellKey(cell.col, cell.row)));
   const slotsByCell = new Map(
     map.buildSlots.map((slot) => [resolveCellKey(slot.col, slot.row), slot] as const)
@@ -187,8 +193,9 @@ function BuildBlueprint({
       }}
     >
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10, color: "var(--text-muted)", fontSize: "0.78rem" }}>
-        <span>{en ? "Path" : "Pfad"}</span>
-        <span>{en ? "Free Slot" : "Freier Slot"}</span>
+
+        <span>{t("Pfad", "Path", "通り道")}</span>
+        <span>{t("Freier Slot", "Free Slot", "空きマス")}</span>
         <span>Tower</span>
       </div>
       <div
@@ -451,7 +458,8 @@ function DetailStat({
 
 export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
   const haptics = useHaptics();
-  const en = model.language === "en";
+
+  const t = textPicker(model.language);
   const previousLeakSignalCountRef = useRef<number | null>(null);
   const previousLivesRef = useRef<number | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
@@ -558,8 +566,9 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
   const canSend = Boolean(selectedEnemy && !model.sendDisabled && currentGold >= sendCost);
 
   const targetLabel = model.nextTargetPlayer
-    ? `${en ? "Next target" : "Naechstes Ziel"}: ${model.nextTargetPlayer.name}`
-    : en ? "No active target" : "Kein aktives Ziel";
+
+    ? `${t("Naechstes Ziel", "Next target", "次のねらい")}: ${model.nextTargetPlayer.name}`
+    : t("Kein aktives Ziel", "No active target", "ねらう相手なし");
 
   return (
     <div style={{ display: "grid", gap: 10 }}>
@@ -610,7 +619,8 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             flexWrap: "wrap"
           }}
         >
-          <strong>{en ? "Your Lane" : "Deine Lane"}</strong>
+
+          <strong>{t("Deine Lane", "Your Lane", "あなたのレーン")}</strong>
           <span style={{ color: "var(--text-muted)" }}>{targetLabel}</span>
         </div>
         {model.currentPlayer ? (
@@ -623,7 +633,8 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
                 Math.round(model.currentPlayer.incomeTickEveryMs / 1000)
               )}s`}
             />
-            <MetricCard label={en ? "Lives" : "Leben"} value={model.currentPlayer.lives} />
+
+            <MetricCard label={t("Leben", "Lives", "ライフ")} value={model.currentPlayer.lives} />
             <MetricCard label="Kills" value={model.currentPlayer.kills} />
             <MetricCard label="Sends" value={model.currentPlayer.sends} />
           </div>
@@ -640,9 +651,11 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             flexWrap: "wrap"
           }}
         >
-          <strong>{en ? "Blueprint" : "Bauplan"}</strong>
+
+          <strong>{t("Bauplan", "Blueprint", "設計図")}</strong>
           <span style={{ color: "var(--text-muted)" }}>
-            {selectedSlot ? `Slot ${selectedSlot.id.toUpperCase()} | ${selectedSlot.col},${selectedSlot.row}` : en ? "Tap build slot" : "Bauplatz antippen"}
+
+            {selectedSlot ? `Slot ${selectedSlot.id.toUpperCase()} | ${selectedSlot.col},${selectedSlot.row}` : t("Bauplatz antippen", "Tap build slot", "建設マスをタップ")}
           </span>
         </div>
         <div style={{ display: "grid", gap: 8 }}>
@@ -670,7 +683,8 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
                 opacity: model.disabled ? 0.55 : 1
               }}
             >
-              {buildTower ? `${en ? "Build" : "Bauen"} ${buildTower.cost}G` : en ? "Build" : "Bauen"}
+
+              {buildTower ? `${t("Bauen", "Build", "建てる")} ${buildTower.cost}G` : t("Bauen", "Build", "建てる")}
             </button>
             <button
               type="button"
@@ -720,7 +734,8 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
                 opacity: model.disabled ? 0.55 : 1
               }}
             >
-              {selectedSlot?.tower ? `${en ? "Sell" : "Verkaufen"} ${selectedSlot.tower.sellValue}G` : en ? "Sell" : "Verkaufen"}
+
+              {selectedSlot?.tower ? `${t("Verkaufen", "Sell", "売る")} ${selectedSlot.tower.sellValue}G` : t("Verkaufen", "Sell", "売る")}
             </button>
             <button
               type="button"
@@ -742,7 +757,8 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
                 opacity: model.disabled ? 0.55 : 1
               }}
             >
-              {showTowerInfo ? (en ? "Info on" : "Info an") : (en ? "Info off" : "Info aus")}
+
+              {showTowerInfo ? t("Info an", "Info on", "情報オン") : t("Info aus", "Info off", "情報オフ")}
             </button>
           </div>
           <div
@@ -755,11 +771,17 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
               background: "color-mix(in srgb, var(--surface) 58%, transparent)"
             }}
           >
-            <strong>{selectedSlot?.tower ? selectedSlot.tower.displayName : en ? "Free build slot" : "Freier Bauplatz"}</strong>
+
+            <strong>{selectedSlot?.tower ? selectedSlot.tower.displayName : t("Freier Bauplatz", "Free build slot", "空いている建設マス")}</strong>
             <span style={{ color: "var(--text-muted)", lineHeight: 1.45 }}>
               {selectedSlot
-                ? resolveTowerStatusText(selectedSlot.tower, en)
-                : en ? "Choose one of the marked slots on your map to build a tower there." : "Waehle einen der markierten Slots auf deiner Map, um Tower direkt dort zu bauen."}
+
+                ? resolveTowerStatusText(selectedSlot.tower, model.language)
+                : t(
+                    "Waehle einen der markierten Slots auf deiner Map, um Tower direkt dort zu bauen.",
+                    "Choose one of the marked slots on your map to build a tower there.",
+                    "マップの印のついたマスを選ぶと、そこにタワーを建てられる。"
+                  )}
             </span>
           </div>
           <BuildBlueprint
@@ -768,7 +790,8 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             rangeOverlay={selectedRangeOverlay}
             disabled={model.disabled}
             accentColor={model.accentColor}
-            en={en}
+
+            language={model.language}
             onSelect={(slotId) => {
               setSelectedSlotId(slotId);
               haptics.tap(20);
@@ -787,9 +810,11 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             flexWrap: "wrap"
           }}
         >
-          <strong>{en ? "Choose Tower" : "Tower auswaehlen"}</strong>
+
+          <strong>{t("Tower auswaehlen", "Choose Tower", "タワーを選ぶ")}</strong>
           <span style={{ color: "var(--text-muted)" }}>
-            {buildTower ? `${buildTower.displayName} | ${buildTower.cost}G` : en ? "Choose a tower for the marked slot" : "Waehl einen Tower fuer den markierten Slot"}
+
+            {buildTower ? `${buildTower.displayName} | ${buildTower.cost}G` : t("Waehl einen Tower fuer den markierten Slot", "Choose a tower for the marked slot", "印のマスに建てるタワーを選ぶ")}
           </span>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 5 }}>
@@ -842,7 +867,8 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             <div style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>{buildTower.description}</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
               <DetailStat
-                label={en ? "Cost" : "Kosten"}
+
+                label={t("Kosten", "Cost", "費用")}
                 value={formatLevelSeries(buildTower.levels.map((level) => level.price))}
                 subtle
               />
@@ -876,7 +902,8 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             flexWrap: "wrap"
           }}
         >
-          <strong>{en ? "Send Enemies" : "Gegner senden"}</strong>
+
+          <strong>{t("Gegner senden", "Send Enemies", "敵を送る")}</strong>
           <span style={{ color: "var(--text-muted)" }}>{currentGold}G</span>
         </div>
         <div style={{ maxHeight: 284, overflowY: "auto", paddingRight: 2 }}>
@@ -927,8 +954,9 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
           }}
         >
           {selectedEnemy
-            ? `${en ? "SEND TO" : "AN"} ${model.nextTargetPlayer?.name ?? "NEXT"} ${en ? "" : "SENDEN"} (${selectedEnemy.sendCost}G)`
-            : en ? "SEND" : "SENDEN"}
+
+            ? `${t("AN", "SEND TO", "送る先")} ${model.nextTargetPlayer?.name ?? "NEXT"} ${t("SENDEN", "", "へ送る")} (${selectedEnemy.sendCost}G)`
+            : t("SENDEN", "SEND", "送る")}
         </button>
         {selectedEnemy ? (
           <div
@@ -944,7 +972,8 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             <strong>{selectedEnemy.displayName}</strong>
             <div style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>{selectedEnemy.description}</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(96px, 1fr))", gap: 8 }}>
-              <DetailStat label={en ? "Cost" : "Kosten"} value={`${selectedEnemy.sendCost}`} />
+
+              <DetailStat label={t("Kosten", "Cost", "費用")} value={`${selectedEnemy.sendCost}`} />
               <DetailStat label="Income" value={`+${selectedEnemy.incomeBonus} / 15s`} />
               <DetailStat label="HP" value={`${selectedEnemy.maxHp}`} />
               <DetailStat label="Speed" value={formatNumber(selectedEnemy.speed)} />

@@ -1,5 +1,6 @@
 import {
   canManagePlayerRoster,
+  textPicker,
   type JoinRoomRequest,
   type PlayerSetupValue,
   type PlayerSnapshot
@@ -184,11 +185,15 @@ export class PlayerManager {
   }
 
   removePlayer(room: RoomRecord, playerId: string): RemovePlayerOutcome {
+    const t = textPicker(room.language);
+
     if (!canManagePlayerRoster(room)) {
       return {
-        error: room.language === "en"
-          ? "Players can only be removed while no active round is running."
-          : "Spieler koennen nur entfernt werden, solange keine aktive Runde laeuft."
+        error: t(
+          "Spieler koennen nur entfernt werden, solange keine aktive Runde laeuft.",
+          "Players can only be removed while no active round is running.",
+          "プレイヤーを退出させられるのは、ラウンドが動いていないときだけ。"
+        )
       };
     }
 
@@ -196,7 +201,7 @@ export class PlayerManager {
 
     if (!player) {
       return {
-        error: room.language === "en" ? "Player not found." : "Spieler nicht gefunden."
+        error: t("Spieler nicht gefunden.", "Player not found.", "そのプレイヤーが見つからない。")
       };
     }
 

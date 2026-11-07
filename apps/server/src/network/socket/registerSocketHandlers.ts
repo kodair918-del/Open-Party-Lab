@@ -1,4 +1,10 @@
-import { normalizeLanguage, type GamePlayerSetupDefinition } from "@open-party-lab/game-core";
+import {
+  defaultLanguage,
+  normalizeLanguage,
+  textPicker,
+  type GamePlayerSetupDefinition,
+  type SupportedLanguage
+} from "@open-party-lab/game-core";
 import { hasActiveRound, ROOM_EXTENSION_WINDOW_MS } from "@open-party-lab/protocol";
 import type {
   AckResult,
@@ -77,60 +83,132 @@ function normalizePlayerSetupValue(
   return normalized;
 }
 
-function socketText(en: boolean) {
+function socketText(language: SupportedLanguage) {
+  const t = textPicker(language);
+
   return {
-    roomNotFound: en ? "Room not found." : "Raum nicht gefunden.",
-    roomCodeNotFound: en ? "Room code not found." : "Raumcode nicht gefunden.",
-    enterPlayerName: en ? "Please enter a player name." : "Bitte gib einen Spielernamen ein.",
-    sessionNotFound: en ? "Session not found." : "Session nicht gefunden.",
-    sessionRoomGone: en ? "The room for this session no longer exists." : "Raum zur Session existiert nicht mehr.",
-    sessionRestoreFailed: en ? "Session could not be restored." : "Session konnte nicht wiederhergestellt werden.",
-    ownSessionOnly: en ? "You can only leave your own session." : "Du kannst nur deine eigene Session verlassen.",
-    leftRoom: en ? "You left the room." : "Du hast den Raum verlassen.",
-    hostLanguageOnly: en ? "Only the host can change the language." : "Nur der Host kann die Sprache aendern.",
-    hostKickOnly: en ? "Only the host can kick players." : "Nur der Host kann Spieler kicken.",
-    kicked: en ? "You were removed from the room by the host." : "Du wurdest vom Host aus dem Raum entfernt.",
-    playerNotFound: en ? "Player not found." : "Spieler nicht gefunden.",
-    ownCharacterOnly: en ? "You can only choose your own character." : "Du darfst nur deinen eigenen Charakter waehlen.",
-    characterOrPlayerNotFound: en ? "Character or player not found." : "Charakter oder Spieler nicht gefunden.",
-    hostSelectOnly: en ? "Only the host can choose games." : "Nur der Host kann Spiele waehlen.",
-    unknownGame: en ? "Unknown game." : "Unbekanntes Spiel.",
-    hostActionOnly: en ? "Only the host can send host actions." : "Nur der Host kann Host-Aktionen senden.",
-    hostActionWrongGame: en
-      ? "This host action does not match the currently selected game."
-      : "Diese Host-Aktion passt nicht zum aktuell ausgewaehlten Spiel.",
-    hostActionUnsupported: en
-      ? "This host action is not supported by the current game."
-      : "Diese Host-Aktion wird vom aktuellen Spiel nicht unterstuetzt.",
-    hostStartOnly: en ? "Only the host can start rounds." : "Nur der Host kann Runden starten.",
-    readyAutoStart: en
-      ? "This round starts automatically once all players are ready again."
-      : "Diese Runde startet automatisch, sobald alle Spieler wieder bereit sind.",
-    notReadyFallback: en
-      ? "All players must be ready and the player count must fit."
-      : "Alle Spieler muessen bereit sein und die Spielerzahl muss passen.",
-    hostAbortOnly: en ? "Only the host can end running rounds." : "Nur der Host kann laufende Runden beenden.",
-    ownInputOnly: en
-      ? "You can only send inputs for your own player."
-      : "Du darfst nur Eingaben fuer deinen eigenen Spieler senden.",
-    hostThemeOnly: en
-      ? "Only the host can change the theme."
-      : "Nur der Host kann das Design aendern.",
-    hostControlPlayersOnly: en
-      ? "Only players in this room can request host control."
-      : "Nur Spieler in diesem Raum koennen die Steuerung anfragen.",
-    hostControlAlreadyHeld: en
-      ? "Another player already has host control."
-      : "Ein anderer Spieler hat die Steuerung bereits.",
-    hostControlScreenOnly: en
-      ? "Only the shared screen can answer takeover requests."
-      : "Nur der Bildschirm kann Uebernahme-Anfragen beantworten.",
-    hostControlNoRequest: en
-      ? "There is no pending takeover request."
-      : "Es liegt keine Uebernahme-Anfrage vor.",
-    hostControlReleaseForbidden: en
-      ? "Only the shared screen or the current holder can hand control back."
-      : "Nur der Bildschirm oder der aktuelle Halter kann die Steuerung zurueckgeben."
+    roomNotFound: t("Raum nicht gefunden.", "Room not found.", "部屋が見つからない。"),
+    roomCodeNotFound: t("Raumcode nicht gefunden.", "Room code not found.", "その部屋コードは見つからない。"),
+    enterPlayerName: t("Bitte gib einen Spielernamen ein.", "Please enter a player name.", "プレイヤー名を入れて。"),
+    sessionNotFound: t("Session nicht gefunden.", "Session not found.", "セッションが見つからない。"),
+    sessionRoomGone: t(
+      "Raum zur Session existiert nicht mehr.",
+      "The room for this session no longer exists.",
+      "このセッションの部屋はもう無い。"
+    ),
+    sessionRestoreFailed: t(
+      "Session konnte nicht wiederhergestellt werden.",
+      "Session could not be restored.",
+      "セッションを戻せなかった。"
+    ),
+    ownSessionOnly: t(
+      "Du kannst nur deine eigene Session verlassen.",
+      "You can only leave your own session.",
+      "自分のセッションしか抜けられない。"
+    ),
+    leftRoom: t("Du hast den Raum verlassen.", "You left the room.", "部屋から出た。"),
+    hostLanguageOnly: t(
+      "Nur der Host kann die Sprache aendern.",
+      "Only the host can change the language.",
+      "言語を変えられるのはホストだけ。"
+    ),
+    hostKickOnly: t(
+      "Nur der Host kann Spieler kicken.",
+      "Only the host can kick players.",
+      "プレイヤーを退出させられるのはホストだけ。"
+    ),
+    kicked: t(
+      "Du wurdest vom Host aus dem Raum entfernt.",
+      "You were removed from the room by the host.",
+      "ホストに部屋から出された。"
+    ),
+    playerNotFound: t("Spieler nicht gefunden.", "Player not found.", "そのプレイヤーが見つからない。"),
+    ownCharacterOnly: t(
+      "Du darfst nur deinen eigenen Charakter waehlen.",
+      "You can only choose your own character.",
+      "選べるのは自分のキャラだけ。"
+    ),
+    characterOrPlayerNotFound: t(
+      "Charakter oder Spieler nicht gefunden.",
+      "Character or player not found.",
+      "キャラかプレイヤーが見つからない。"
+    ),
+    hostSelectOnly: t(
+      "Nur der Host kann Spiele waehlen.",
+      "Only the host can choose games.",
+      "ゲームを選べるのはホストだけ。"
+    ),
+    unknownGame: t("Unbekanntes Spiel.", "Unknown game.", "知らないゲーム。"),
+    hostActionOnly: t(
+      "Nur der Host kann Host-Aktionen senden.",
+      "Only the host can send host actions.",
+      "ホスト操作を送れるのはホストだけ。"
+    ),
+    hostActionWrongGame: t(
+      "Diese Host-Aktion passt nicht zum aktuell ausgewaehlten Spiel.",
+      "This host action does not match the currently selected game.",
+      "このホスト操作は、いま選んでいるゲームに合っていない。"
+    ),
+    hostActionUnsupported: t(
+      "Diese Host-Aktion wird vom aktuellen Spiel nicht unterstuetzt.",
+      "This host action is not supported by the current game.",
+      "このホスト操作は、いまのゲームでは使えない。"
+    ),
+    hostStartOnly: t(
+      "Nur der Host kann Runden starten.",
+      "Only the host can start rounds.",
+      "ラウンドを始められるのはホストだけ。"
+    ),
+    readyAutoStart: t(
+      "Diese Runde startet automatisch, sobald alle Spieler wieder bereit sind.",
+      "This round starts automatically once all players are ready again.",
+      "このラウンドは、全員がまた準備OKになれば自動で始まる。"
+    ),
+    notReadyFallback: t(
+      "Alle Spieler muessen bereit sein und die Spielerzahl muss passen.",
+      "All players must be ready and the player count must fit.",
+      "全員が準備OKで、人数も合っている必要がある。"
+    ),
+    hostAbortOnly: t(
+      "Nur der Host kann laufende Runden beenden.",
+      "Only the host can end running rounds.",
+      "進行中のラウンドを終われるのはホストだけ。"
+    ),
+    ownInputOnly: t(
+      "Du darfst nur Eingaben fuer deinen eigenen Spieler senden.",
+      "You can only send inputs for your own player.",
+      "送れるのは自分のプレイヤーの入力だけ。"
+    ),
+    hostThemeOnly: t(
+      "Nur der Host kann das Design aendern.",
+      "Only the host can change the theme.",
+      "配色を変えられるのはホストだけ。"
+    ),
+    hostControlPlayersOnly: t(
+      "Nur Spieler in diesem Raum koennen die Steuerung anfragen.",
+      "Only players in this room can request host control.",
+      "ホスト操作を頼めるのは、この部屋のプレイヤーだけ。"
+    ),
+    hostControlAlreadyHeld: t(
+      "Ein anderer Spieler hat die Steuerung bereits.",
+      "Another player already has host control.",
+      "別のプレイヤーがもうホスト操作を持っている。"
+    ),
+    hostControlScreenOnly: t(
+      "Nur der Bildschirm kann Uebernahme-Anfragen beantworten.",
+      "Only the shared screen can answer takeover requests.",
+      "引き継ぎの依頼に答えられるのは、大きい画面だけ。"
+    ),
+    hostControlNoRequest: t(
+      "Es liegt keine Uebernahme-Anfrage vor.",
+      "There is no pending takeover request.",
+      "引き継ぎの依頼は来ていない。"
+    ),
+    hostControlReleaseForbidden: t(
+      "Nur der Bildschirm oder der aktuelle Halter kann die Steuerung zurueckgeben.",
+      "Only the shared screen or the current holder can hand control back.",
+      "操作を返せるのは、大きい画面か、いま操作を持っている人だけ。"
+    )
   };
 }
 
@@ -345,13 +423,13 @@ export function registerSocketHandlers({
         const capacity = roomCleanupService.prepareForRoomCreation();
 
         if (!capacity.ok) {
-          const en = normalizeLanguage(payload.language) === "en";
+          const t = textPicker(normalizeLanguage(payload.language));
           const maxRoomCount = roomCleanupService.getMaxRoomCount();
-          ack(ackError(
-            en
-              ? `The server already has ${maxRoomCount} active rooms. Please try again later.`
-              : `Der Server hat bereits ${maxRoomCount} aktive Räume. Bitte versuche es später erneut.`
-          ));
+          ack(ackError(t(
+            `Der Server hat bereits ${maxRoomCount} aktive Räume. Bitte versuche es später erneut.`,
+            `The server already has ${maxRoomCount} active rooms. Please try again later.`,
+            `サーバーはもう ${maxRoomCount} 部屋いっぱい。しばらくしてからもう一度試して。`
+          )));
           return;
         }
       }
@@ -361,7 +439,7 @@ export function registerSocketHandlers({
         : roomManager.createRoom(hostName, normalizeLanguage(payload.language));
 
       if (!room) {
-        ack(ackError("Raumcode nicht gefunden."));
+        ack(ackError(socketText(normalizeLanguage(payload.language)).roomCodeNotFound));
         return;
       }
 
@@ -404,7 +482,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         ack(ackError(text.hostLanguageOnly));
@@ -435,7 +513,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         ack(ackError(text.hostThemeOnly));
@@ -450,30 +528,46 @@ export function registerSocketHandlers({
 
     on("room:extend-lifetime", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
-      const en = room?.language === "en";
+      const t = textPicker(normalizeLanguage(room?.language));
 
       if (!hostedMode) {
-        ack(ackError(en ? "Room lifetime extension is only available on the hosted server." : "Die Raumverlaengerung ist nur auf dem gehosteten Server verfuegbar."));
+        ack(ackError(t(
+          "Die Raumverlaengerung ist nur auf dem gehosteten Server verfuegbar.",
+          "Room lifetime extension is only available on the hosted server.",
+          "部屋の延長は、公開サーバーでしか使えない。"
+        )));
         return;
       }
 
       if (!room) {
-        ack(ackError(socketText(false).roomNotFound));
+        ack(ackError(socketText(normalizeLanguage(undefined)).roomNotFound));
         return;
       }
 
       if (socket.data.role !== "host" || socket.data.roomCode !== room.code || room.hostSocketId !== socket.id) {
-        ack(ackError(en ? "Only the host can extend the room." : "Nur der Host kann den Raum verlaengern."));
+        ack(ackError(t(
+          "Nur der Host kann den Raum verlaengern.",
+          "Only the host can extend the room.",
+          "部屋を延長できるのはホストだけ。"
+        )));
         return;
       }
 
       if (room.expiresAt === null || room.expiresAt <= now()) {
-        ack(ackError(en ? "This room is already expired." : "Dieser Raum ist bereits abgelaufen."));
+        ack(ackError(t(
+          "Dieser Raum ist bereits abgelaufen.",
+          "This room is already expired.",
+          "この部屋はもう期限切れ。"
+        )));
         return;
       }
 
       if (room.expiresAt - now() > ROOM_EXTENSION_WINDOW_MS) {
-        ack(ackError(en ? "Room extension is available during the final five minutes only." : "Die Raumverlaengerung ist erst in den letzten fuenf Minuten moeglich."));
+        ack(ackError(t(
+          "Die Raumverlaengerung ist erst in den letzten fuenf Minuten moeglich.",
+          "Room extension is available during the final five minutes only.",
+          "部屋の延長は、残り5分になってからしかできない。"
+        )));
         return;
       }
 
@@ -486,10 +580,11 @@ export function registerSocketHandlers({
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
-        ack(ackError("Raumcode nicht gefunden."));
+        // The room is gone, so there is no room language to answer in.
+        ack(ackError(socketText(defaultLanguage).roomCodeNotFound));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       const playerName = payload.playerName.trim();
 
@@ -539,7 +634,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum zur Session existiert nicht mehr."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       const player = playerManager.resumePlayer(
         room,
@@ -594,7 +689,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (socket.data.role !== "controller" || socket.data.roomCode !== room.code || !socket.data.playerId) {
         ack(ackError(text.ownSessionOnly));
@@ -642,7 +737,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         ack(ackError(text.hostKickOnly));
@@ -698,7 +793,7 @@ export function registerSocketHandlers({
         stateBroadcaster.emitError(socket, "room/not-found", "Raum nicht gefunden.");
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       const player = playerManager.setReady(room, payload.playerId, payload.isReady);
 
@@ -713,22 +808,34 @@ export function registerSocketHandlers({
 
     on("player:set-profile", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
-      const en = room?.language === "en";
+      const t = textPicker(normalizeLanguage(room?.language));
       const player = room?.players.get(payload.playerId);
       if (!room || !player || socket.data.role !== "controller" ||
           socket.data.roomCode !== room.code || socket.data.playerId !== player.id || player.socketId !== socket.id) {
-        ack(ackError(en ? "You can only edit your own profile." : "Du kannst nur dein eigenes Profil ändern."));
+        ack(ackError(t(
+          "Du kannst nur dein eigenes Profil ändern.",
+          "You can only edit your own profile.",
+          "変えられるのは自分のプロフィールだけ。"
+        )));
         return;
       }
       if (hasActiveRound(room)) {
-        ack(ackError(en ? "Edit your profile in the lobby." : "Ändere dein Profil in der Lobby."));
+        ack(ackError(t(
+          "Ändere dein Profil in der Lobby.",
+          "Edit your profile in the lobby.",
+          "プロフィールはロビーで変える。"
+        )));
         return;
       }
       const name = typeof payload.name === "string" ? payload.name.trim() : "";
       const avatar = payload.avatar;
       if (!name || name.length > 32 || (avatar !== null &&
           (typeof avatar !== "string" || avatar.length > 35_000 || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(avatar)))) {
-        ack(ackError(en ? "Use a name of 1–32 characters and a compressed selfie." : "Verwende einen Namen mit 1–32 Zeichen und ein komprimiertes Selfie."));
+        ack(ackError(t(
+          "Verwende einen Namen mit 1–32 Zeichen und ein komprimiertes Selfie.",
+          "Use a name of 1–32 characters and a compressed selfie.",
+          "名前は1〜32文字で、自撮りは圧縮したものを使って。"
+        )));
         return;
       }
       player.name = name;
@@ -745,7 +852,7 @@ export function registerSocketHandlers({
         stateBroadcaster.emitError(socket, "room/not-found", "Raum nicht gefunden.");
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (socket.data.role !== "controller" || socket.data.playerId !== payload.playerId) {
         stateBroadcaster.emitError(
@@ -798,7 +905,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (socket.data.role !== "controller" || socket.data.playerId !== payload.playerId) {
         ack(ackError(text.ownCharacterOnly));
@@ -861,7 +968,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (
         socket.data.role !== "controller" ||
@@ -888,7 +995,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       // The question is put to whoever would lose the controls, so the current
       // holder answers it. The shared screen may answer too — it owns the room
@@ -921,7 +1028,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       const isScreen = socket.data.role === "host" && socket.data.roomCode === room.code;
       const isHolder =
@@ -953,7 +1060,7 @@ export function registerSocketHandlers({
         return;
       }
 
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         stateBroadcaster.emitError(socket, "room/forbidden", text.hostActionOnly);
@@ -983,7 +1090,7 @@ export function registerSocketHandlers({
         stateBroadcaster.emitError(socket, "room/not-found", "Raum nicht gefunden.");
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         stateBroadcaster.emitError(socket, "room/forbidden", text.hostSelectOnly);
@@ -1016,7 +1123,7 @@ export function registerSocketHandlers({
         stateBroadcaster.emitError(socket, "room/not-found", "Raum nicht gefunden.");
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         stateBroadcaster.emitError(socket, "room/forbidden", text.hostActionOnly);
@@ -1080,7 +1187,7 @@ export function registerSocketHandlers({
         stateBroadcaster.emitError(socket, "room/not-found", "Raum nicht gefunden.");
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         stateBroadcaster.emitError(socket, "room/forbidden", text.hostStartOnly);
@@ -1118,7 +1225,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         ack(ackError(text.hostAbortOnly));
@@ -1150,7 +1257,7 @@ export function registerSocketHandlers({
         stateBroadcaster.emitError(socket, "room/not-found", "Raum nicht gefunden.");
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (socket.data.role !== "controller" || socket.data.playerId !== payload.playerId) {
         stateBroadcaster.emitError(

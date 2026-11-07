@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
+
 import type { MagicArenaLayoutModel } from "./models.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
+import { textPicker, type SupportedLanguage } from "@open-party-lab/protocol";
 
 interface MagicArenaLayoutProps {
   model: MagicArenaLayoutModel;
@@ -250,18 +252,28 @@ function isSelfOnlyCard(cardId: MagicArenaCardId | undefined): boolean {
   return cardId === "earthquake" || cardId === "stealth" || cardId === "shockwave";
 }
 
-function getBaseActionDescription(mode: DraftMode, en: boolean): string | null {
+
+function getBaseActionDescription(mode: DraftMode, language?: SupportedLanguage): string | null {
+  const t = textPicker(language);
   switch (mode) {
     case "base:move":
-      return en ? "Move the selected figure up to 2 free hexes." : "Bewege die gewaehlte Figur bis zu 2 freie Hexfelder.";
+      return t(
+        "Bewege die gewaehlte Figur bis zu 2 freie Hexfelder.",
+        "Move the selected figure up to 2 free hexes.",
+        "選んだコマを空いているマス2つぶんまで動かす。"
+      );
     case "base:punch":
-      return en
-        ? "Hit an enemy on your own or an adjacent hex. If no enemy is there, damage the field."
-        : "Trifft einen Gegner auf dem eigenen oder angrenzenden Feld. Wenn keiner dort steht, nimmt das Feld Schaden.";
+      return t(
+        "Trifft einen Gegner auf dem eigenen oder angrenzenden Feld. Wenn keiner dort steht, nimmt das Feld Schaden.",
+        "Hit an enemy on your own or an adjacent hex. If no enemy is there, damage the field.",
+        "自分のマスか隣のマスにいる敵をなぐる。敵がいなければマスを削る。"
+      );
     case "base:dig":
-      return en
-        ? "Reduce your current field by 1 HP and find cards, or sometimes a buried bomb."
-        : "Baut das eigene Feld um 1 ab und findet Karten, manchmal aber eine vergrabene Bombe.";
+      return t(
+        "Baut das eigene Feld um 1 ab und findet Karten, manchmal aber eine vergrabene Bombe.",
+        "Reduce your current field by 1 HP and find cards, or sometimes a buried bomb.",
+        "今いるマスを1だけ掘ってカードを見つける。ときどき埋まった爆弾が出る。"
+      );
     default:
       return null;
   }
@@ -468,7 +480,8 @@ interface PlannedBoardMarker {
 }
 
 export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
-  const en = model.language === "en";
+
+  const t = textPicker(model.language);
   const state = model.state as MagicArenaControllerState;
   const ownPlayer = state.ownPlayer;
   const ownPlans = state.plannedActionsByPlayer?.[model.currentPlayerId] ?? [];
@@ -519,7 +532,8 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
   const canReady =
     plannedSlotCount >= selectableSlots && selectableSlots >= 0 && !ready && state.magicPhase === "planning";
   const actionComplete = Boolean(buildDraftAction());
-  const selectedActionDescription = selectedCardDefinition?.description ?? getBaseActionDescription(mode, en);
+  const selectedActionDescription = selectedCardDefinition?.description ?? 
+getBaseActionDescription(mode, model.language);
   const boardCells = useMemo<BoardCellLayout[]>(() => {
     const fields = Object.values(fieldsByCoord).sort(
       (left, right) => left.coord.r - right.coord.r || left.coord.q - right.coord.q
@@ -1176,10 +1190,11 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
 
   const phaseLabel =
     state.magicPhase === "planning"
-      ? en ? "Planning" : "Planung"
+
+      ? t("Planung", "Planning", "作戦を立てる")
       : state.magicPhase === "execution"
-        ? en ? "Execution" : "Ausfuehrung"
-        : en ? "Game over" : "Spielende";
+        ? t("Ausfuehrung", "Execution", "実行中")
+        : t("Spielende", "Game over", "ゲーム終了");
 
   return (
     <div className="magic-arena-controller" style={arenaControllerStyle}>
@@ -1205,19 +1220,27 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
         <section style={turnBannerStyle(isOwnTurn)}>
           <strong>
             {isOwnTurn
-              ? en ? "Your turn" : "Du bist am Zug"
-              : en
-                ? `Waiting for ${activePlayerName}`
-                : `${activePlayerName} ist am Zug`}
+
+              ? t("Du bist am Zug", "Your turn", "あなたの番")
+              : t(
+                  `${activePlayerName} ist am Zug`,
+                  `Waiting for ${activePlayerName}`,
+                  `${activePlayerName} の番を待っている`
+                )}
           </strong>
           <span style={{ color: "var(--text-muted)", lineHeight: 1.3 }}>
             {isOwnTurn
-              ? en
-                ? "Pick a figure, an action and a target, then execute your move."
-                : "Waehle Figur, Aktion und Ziel und fuehre deinen Zug aus."
-              : en
-                ? "The other players act one after another."
-                : "Die Spieler ziehen nacheinander."}
+
+              ? t(
+                  "Waehle Figur, Aktion und Ziel und fuehre deinen Zug aus.",
+                  "Pick a figure, an action and a target, then execute your move.",
+                  "コマ・行動・ねらう先を選んで、動かす。"
+                )
+              : t(
+                  "Die Spieler ziehen nacheinander.",
+                  "The other players act one after another.",
+                  "ほかの人が順番に動いている。"
+                )}
           </span>
         </section>
       ) : (
@@ -1254,19 +1277,21 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
       )}
 
       <section style={panelStyle}>
-        <strong>{en ? "Action" : "Aktion"}</strong>
+
+        <strong>{t("Aktion", "Action", "行動")}</strong>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 6 }}>
-          <button type="button" title={en ? "Move" : "Bewegen"} aria-label={en ? "Move" : "Bewegen"} disabled={model.disabled} onClick={() => resetTargets("base:move")} style={modeButtonStyle(mode === "base:move")}>
+
+          <button type="button" title={t("Bewegen", "Move", "うごく")} aria-label={t("Bewegen", "Move", "うごく")} disabled={model.disabled} onClick={() => resetTargets("base:move")} style={modeButtonStyle(mode === "base:move")}>
             <ActionIcon actionId="move" large />
-            <span style={actionArtCaptionStyle}>{en ? "Move" : "Bewegen"}</span>
+            <span style={actionArtCaptionStyle}>{t("Bewegen", "Move", "うごく")}</span>
           </button>
-          <button type="button" title={en ? "Punch" : "Schlagen"} aria-label={en ? "Punch" : "Schlagen"} disabled={model.disabled} onClick={() => resetTargets("base:punch")} style={modeButtonStyle(mode === "base:punch")}>
+          <button type="button" title={t("Schlagen", "Punch", "なぐる")} aria-label={t("Schlagen", "Punch", "なぐる")} disabled={model.disabled} onClick={() => resetTargets("base:punch")} style={modeButtonStyle(mode === "base:punch")}>
             <ActionIcon actionId="punch" large />
-            <span style={actionArtCaptionStyle}>{en ? "Punch" : "Schlagen"}</span>
+            <span style={actionArtCaptionStyle}>{t("Schlagen", "Punch", "なぐる")}</span>
           </button>
-          <button type="button" title={en ? "Dig" : "Graben"} aria-label={en ? "Dig" : "Graben"} disabled={model.disabled} onClick={() => resetTargets("base:dig")} style={modeButtonStyle(mode === "base:dig")}>
+          <button type="button" title={t("Graben", "Dig", "ほる")} aria-label={t("Graben", "Dig", "ほる")} disabled={model.disabled} onClick={() => resetTargets("base:dig")} style={modeButtonStyle(mode === "base:dig")}>
             <ActionIcon actionId="dig" large />
-            <span style={actionArtCaptionStyle}>{en ? "Dig" : "Graben"}</span>
+            <span style={actionArtCaptionStyle}>{t("Graben", "Dig", "ほる")}</span>
           </button>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 6 }}>
@@ -1450,7 +1475,8 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
 
       {needsDirection(currentCardId, targetSameAsFigure) ? (
         <section style={panelStyle}>
-          <strong>{en ? "Direction" : "Richtung"}</strong>
+
+          <strong>{t("Richtung", "Direction", "向き")}</strong>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(6, minmax(0, 1fr))", gap: 5 }}>
             {directionLabels.map((label, index) => (
               <button key={label} type="button" onClick={() => setDirection(index)} style={modeButtonStyle(direction === index)}>
@@ -1469,23 +1495,27 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
             onClick={confirmSlot}
             style={{ ...primaryButtonStyle, width: "100%", opacity: model.disabled || !actionComplete ? 0.5 : 1 }}
           >
-            {en ? "Execute move" : "Zug ausfuehren"}
+
+            {t("Zug ausfuehren", "Execute move", "この手を実行")}
           </button>
         </section>
       ) : (
         <section style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 6 }}>
           <button type="button" disabled={model.disabled || !actionComplete} onClick={confirmSlot} style={primaryButtonStyle}>
-            {en ? "Lock slot" : "Slot setzen"}
+
+            {t("Slot setzen", "Lock slot", "この枠を確定")}
           </button>
           <button type="button" disabled={!canReady} onClick={model.onReady} style={canReady ? primaryButtonStyle : secondaryButtonStyle}>
-            {ready ? (en ? "Ready" : "Bereit") : "Ready"}
+
+            {ready ? t("Bereit", "Ready", "準備OK") : t("Ready", "Ready", "準備する")}
           </button>
         </section>
       )}
 
       {state.magicPhase !== "planning" ? (
         <section style={panelStyle}>
-          <strong>{state.activeAction?.label ?? (en ? "Waiting for execution" : "Warte auf Ausfuehrung")}</strong>
+
+          <strong>{state.activeAction?.label ?? t("Warte auf Ausfuehrung", "Waiting for execution", "実行を待っている")}</strong>
           <div style={{ display: "grid", gap: 4 }}>
             {(ownPlayer?.figures ?? []).map((figure) => (
               <span key={figure.figureId} style={{ color: "var(--text-muted)" }}>
